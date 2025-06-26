@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://fm66keqjbfnp"]
+
+[ext_resource type="Script" uid="uid://df4mq1qafri54" path="res://gameobjects/Lapis/LapizSeguidor.gd" id="1_phnhv"]
+[ext_resource type="Texture2D" uid="uid://c7kgiuwi2m12h" path="res://gameobjects/Lapis/Lapis.png" id="1_ssrxk"]
+
+[node name="LapizSeguidor" type="Node2D"]
+script = ExtResource("1_phnhv")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.375, 0.375)
+texture = ExtResource("1_ssrxk")
