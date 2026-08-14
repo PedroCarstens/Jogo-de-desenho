@@ -1,24 +1,25 @@
-[gd_scene load_steps=5 format=3 uid="uid://cpv85q0yg3ftm"]
+[gd_scene format=3 uid="uid://cpv85q0yg3ftm"]
 
 [ext_resource type="PackedScene" uid="uid://cl5m6fst7ga2m" path="res://gameobjects/placeholders/grass(placeholder).tscn" id="1_loh58"]
 [ext_resource type="PackedScene" uid="uid://bhhchg448t5ct" path="res://gameobjects/player/player.tscn" id="2_nrgl5"]
 [ext_resource type="PackedScene" uid="uid://fm66keqjbfnp" path="res://gameobjects/Lapis/lapiz_seguidor.tscn" id="3_nrgl5"]
 [ext_resource type="PackedScene" uid="uid://dpfqemdgcpo5q" path="res://gameobjects/Lapis/DesenhoController.tscn" id="4_sclhy"]
 
-[node name="debug" type="Node2D"]
+[node name="debug" type="Node2D" unique_id=1587276390]
+position = Vector2(4, 0)
 
-[node name="grass(placeholder)" parent="." instance=ExtResource("1_loh58")]
+[node name="grass(placeholder)" parent="." unique_id=368029222 instance=ExtResource("1_loh58")]
 position = Vector2(606, 612)
 scale = Vector2(-3.96058, 0.168685)
 
-[node name="LapizSeguidor" parent="." instance=ExtResource("3_nrgl5")]
+[node name="LapizSeguidor" parent="." unique_id=252995882 instance=ExtResource("3_nrgl5")]
 rotation = -2.86234
 scale = Vector2(0.44, 0.44)
 
-[node name="DesenhoController" parent="." instance=ExtResource("4_sclhy")]
+[node name="DesenhoController" parent="." unique_id=2005685649 instance=ExtResource("4_sclhy")]
 
-[node name="Player" parent="." instance=ExtResource("2_nrgl5")]
-position = Vector2(301, 497)
+[node name="Player" parent="." unique_id=1291541874 instance=ExtResource("2_nrgl5")]
+position = Vector2(304, 497)
 
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(582, 347)
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1035628458]
+position = Vector2(288, -152)

@@ -1,0 +1,65 @@
+[gd_scene format=3 uid="uid://1b354tnisov0"]
+
+[node name="InterfaceMovimento" type="Control" unique_id=1913924316]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Painel" type="PanelContainer" parent="." unique_id=2047818166]
+layout_mode = 0
+offset_left = 725.0
+offset_top = 2.0
+offset_right = 1151.0
+offset_bottom = 650.0
+
+[node name="Margem" type="MarginContainer" parent="Painel" unique_id=1243649415]
+layout_mode = 2
+
+[node name="Conteudo" type="VBoxContainer" parent="Painel/Margem" unique_id=1299363815]
+layout_mode = 2
+
+[node name="Titulo" type="Label" parent="Painel/Margem/Conteudo" unique_id=1665167599]
+layout_mode = 2
+text = "[Editor de parametros]"
+
+[node name="SeparadorMovimento" type="HSeparator" parent="Painel/Margem/Conteudo" unique_id=1581091510]
+layout_mode = 2
+
+[node name="Velocidade" type="HBoxContainer" parent="Painel/Margem/Conteudo" unique_id=1965845971]
+layout_mode = 2
+
+[node name="Nome" type="Label" parent="Painel/Margem/Conteudo/Velocidade" unique_id=746571813]
+layout_mode = 2
+text = "Velocidade"
+
+[node name="Slider" type="HSlider" parent="Painel/Margem/Conteudo/Velocidade" unique_id=877253616]
+layout_mode = 2
+
+[node name="Aceleracao" type="HBoxContainer" parent="Painel/Margem/Conteudo" unique_id=35216908]
+layout_mode = 2
+
+[node name="Nome" type="Label" parent="Painel/Margem/Conteudo/Aceleracao" unique_id=1551904412]
+layout_mode = 2
+text = "Aceleração"
+
+[node name="Slider" type="HSlider" parent="Painel/Margem/Conteudo/Aceleracao" unique_id=372014875]
+layout_mode = 2
+
+[node name="Desaceleracao" type="HBoxContainer" parent="Painel/Margem/Conteudo" unique_id=866236369]
+layout_mode = 2
+
+[node name="Nome" type="Label" parent="Painel/Margem/Conteudo/Desaceleracao" unique_id=1320097007]
+layout_mode = 2
+text = "Desaceleração"
+
+[node name="Slider" type="HSlider" parent="Painel/Margem/Conteudo/Desaceleracao" unique_id=1399690456]
+layout_mode = 2
+
+[node name="SeparadorCorrida" type="HSeparator" parent="Painel/Margem/Conteudo" unique_id=2089502462]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Painel/Margem/Conteudo" unique_id=1476633059]
+layout_mode = 2
