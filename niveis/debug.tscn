@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dpfqemdgcpo5q" path="res://gameobjects/Lapis/DesenhoController.tscn" id="4_sclhy"]
 [ext_resource type="Script" uid="uid://6qgcpevec1ck" path="res://scripts/player/Camera.gd" id="5_trhll"]
 [ext_resource type="Script" uid="uid://b0ld4ldve45vm" path="res://scripts/ApagarDesenhos.gd" id="7_fkpx4"]
-[ext_resource type="Script" uid="uid://nlbj5c1hrv1g" path="res://scripts/ResetLayout.gd" id="8_cqvk4"]
+[ext_resource type="Script" path="res://scripts/ResetLayout.gd" id="8_cqvk4"]
 
 [node name="debug" type="Node2D" unique_id=1587276390]
 position = Vector2(4, 0)
