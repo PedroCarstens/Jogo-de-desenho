@@ -1,5 +1,5 @@
 extends CharacterBody2D
-class_name Player
+class_name Player1
 # Define a classe Player associada ao CharacterBody2D
 
 #=============== variaveis do player ==================

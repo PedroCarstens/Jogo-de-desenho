@@ -4,22 +4,73 @@
 [ext_resource type="PackedScene" uid="uid://bhhchg448t5ct" path="res://gameobjects/player/player.tscn" id="2_nrgl5"]
 [ext_resource type="PackedScene" uid="uid://fm66keqjbfnp" path="res://gameobjects/Lapis/lapiz_seguidor.tscn" id="3_nrgl5"]
 [ext_resource type="PackedScene" uid="uid://dpfqemdgcpo5q" path="res://gameobjects/Lapis/DesenhoController.tscn" id="4_sclhy"]
+[ext_resource type="Script" uid="uid://6qgcpevec1ck" path="res://scripts/player/Camera.gd" id="5_trhll"]
+[ext_resource type="Script" uid="uid://bxdo5gury4dqx" path="res://scripts/player/Player_v2.gd" id="5_va8r5"]
+[ext_resource type="Script" uid="uid://b0ld4ldve45vm" path="res://scripts/ApagarDesenhos.gd" id="7_fkpx4"]
+[ext_resource type="Script" uid="uid://nlbj5c1hrv1g" path="res://scripts/ResetLayout.gd.gd" id="8_cqvk4"]
 
 [node name="debug" type="Node2D" unique_id=1587276390]
 position = Vector2(4, 0)
-
-[node name="grass(placeholder)" parent="." unique_id=368029222 instance=ExtResource("1_loh58")]
-position = Vector2(606, 612)
-scale = Vector2(-3.96058, 0.168685)
 
 [node name="LapizSeguidor" parent="." unique_id=252995882 instance=ExtResource("3_nrgl5")]
 rotation = -2.86234
 scale = Vector2(0.44, 0.44)
 
+[node name="Player" parent="." unique_id=1291541874 instance=ExtResource("2_nrgl5")]
+position = Vector2(186, 442)
+script = ExtResource("5_va8r5")
+aceleracao = 1200.0
+desaceleracao = 1500.0
+controle_no_ar = 0.8
+quantidade_pulos = 1
+pulo_variavel = true
+multiplicador_pulo_curto = 0.5
+gravidade = 1000.0
+gravidade_subindo = 1.0
+gravidade_caindo = 1.0
+velocidade_maxima_queda = 1200.0
+tempo_coyote = 0.12
+tempo_buffer_pulo = 0.12
+margem_horizontal = 120.0
+margem_vertical = 80.0
+suavidade_horizontal = 5.0
+suavidade_vertical = 3.0
+antecipacao_horizontal = 60.0
+suavidade_antecipacao = 4.0
+camera_antecipacao = true
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1035628458 node_paths=PackedStringArray("jogador")]
+position = Vector2(288, 318)
+script = ExtResource("5_trhll")
+jogador = NodePath("../Player")
+
 [node name="DesenhoController" parent="." unique_id=2005685649 instance=ExtResource("4_sclhy")]
 
-[node name="Player" parent="." unique_id=1291541874 instance=ExtResource("2_nrgl5")]
-position = Vector2(304, 497)
+[node name="interface" type="CanvasLayer" parent="." unique_id=1773718998]
 
-[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1035628458]
-position = Vector2(288, -152)
+[node name="Button" type="Button" parent="interface" unique_id=84214825 node_paths=PackedStringArray("desenho_controller")]
+offset_left = 800.0
+offset_top = 605.0
+offset_right = 862.0
+offset_bottom = 636.0
+text = "apagar
+"
+script = ExtResource("7_fkpx4")
+desenho_controller = NodePath("../../DesenhoController")
+
+[node name="mapa" type="Node" parent="." unique_id=1090235493]
+
+[node name="grass(placeholder)" parent="mapa" unique_id=368029222 instance=ExtResource("1_loh58")]
+position = Vector2(392.99988, 609)
+rotation = -3.1415927
+scale = Vector2(3.96058, -0.168685)
+
+[node name="grass(placeholder)2" parent="mapa" unique_id=1089141432 instance=ExtResource("1_loh58")]
+position = Vector2(2414, 579)
+rotation = -3.1415927
+scale = Vector2(3.96058, -0.168685)
+
+[node name="ResetLayout" type="Node" parent="." unique_id=1752049622]
+script = ExtResource("8_cqvk4")
+
+[editable path="DesenhoController"]

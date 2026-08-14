@@ -1,138 +1,154 @@
 extends CharacterBody2D
 
+class_name Player
+
 
 # ============================================================
-# MOVIMENTO DO PERSONAGEM
+# VELOCIDADE HORIZONTAL
 # ============================================================
-# Script responsável pelo movimento horizontal e vertical
-# do personagem.
+# Define como o personagem se movimenta para os lados.
+# ============================================================
+
+@export_category("Velocidade Horizontal")
+
+# Velocidade máxima andando.
+@export var velocidade_normal: float = 200.0
+
+# Velocidade máxima correndo.
+@export var velocidade_correndo: float = 350.0
+
+# Força utilizada para acelerar o personagem.
 #
-# Os principais parâmetros estão como @export para permitir
-# alterações diretamente pelo Inspector da Godot.
+# Quanto maior o valor, mais rapidamente o personagem
+# chega à velocidade máxima.
+@export var aceleracao: float = 1200.0
+
+# Força utilizada para desacelerar o personagem.
 #
-# Ações utilizadas no Input Map:
-# andar_frente -> D / Right
-# andar_traz   -> A / Left
-# pulo         -> Space / W / Up
-# correr       -> Shift
-# ============================================================
+# Quanto maior o valor, mais rapidamente o personagem para.
+@export var desaceleracao: float = 1500.0
 
-
-# ============================================================
-# MOVIMENTO
-# ============================================================
-
-@export_category("Movimento")
-
-# Velocidade máxima normal do personagem.
-@export var velocidade_maxima: float = 250.0
-
-# Velocidade utilizada para acelerar o personagem.
-@export var aceleracao: float = 1500.0
-
-# Velocidade utilizada para desacelerar o personagem
-# quando nenhuma direção estiver sendo pressionada.
-@export var desaceleracao: float = 1800.0
-
-# Permite inverter os controles horizontais.
-@export var inverter_movimento: bool = false
-
-
-# ============================================================
-# CORRIDA
-# ============================================================
-
-@export_category("Corrida")
-
-# Multiplicador aplicado à velocidade enquanto o jogador
-# estiver segurando o botão de correr.
+# Controle horizontal enquanto estiver no ar.
 #
-# Exemplo:
-# 1.0 = velocidade normal
-# 1.5 = 50% mais rápido
-# 2.0 = velocidade dobrada
-@export_range(1.0, 3.0, 0.1) var multiplicador_corrida: float = 1.5
-
-
-# ============================================================
-# GRAVIDADE
-# ============================================================
-
-@export_category("Gravidade")
-
-# Gravidade aplicada ao personagem.
-#
-# Esse valor representa a força que faz o personagem
-# retornar para o chão.
-@export var gravidade: float = 1200.0
-
-# Gravidade utilizada enquanto o personagem está subindo.
-#
-# Um valor menor deixa o salto mais suave e flutuante.
-@export var gravidade_subindo: float = 900.0
-
-# Gravidade utilizada enquanto o personagem está caindo.
-#
-# Um valor maior faz o personagem cair mais rapidamente.
-@export var gravidade_caindo: float = 1400.0
+# 1.0 = controle total
+# 0.5 = metade do controle
+# 0.0 = nenhum controle
+@export_range(0.0, 1.0, 0.05) var controle_no_ar: float = 0.8
 
 
 # ============================================================
 # PULO
 # ============================================================
+# Define a força e o comportamento do salto.
+# ============================================================
 
 @export_category("Pulo")
 
-# Força inicial aplicada ao personagem quando ele pula.
-@export var forca_pulo: float = 450.0
+# Impulso inicial do salto.
+#
+# Valores mais negativos fazem o personagem subir mais.
+@export var impulso_pulo: float = -400.0
 
-# Quantidade máxima de pulos disponíveis.
+# Quantidade de pulos disponíveis.
 #
 # 1 = pulo normal
 # 2 = pulo duplo
-# 3 = pulo triplo
 @export_range(1, 5, 1) var quantidade_pulos: int = 1
 
-# Permite controlar a altura do pulo soltando o botão
-# antes que o personagem atinja o ponto máximo.
+# Permite controlar a altura do salto soltando o botão.
 @export var pulo_variavel: bool = true
 
-# Multiplicador utilizado quando o jogador solta o botão
-# de pulo antes do personagem atingir o ponto máximo.
-#
-# Valores menores fazem o salto ser interrompido
-# mais rapidamente.
+# Define quanto da velocidade será mantida quando o botão
+# de pulo for solto durante a subida.
 @export_range(0.0, 1.0, 0.05) var multiplicador_pulo_curto: float = 0.5
+
+
+# ============================================================
+# GRAVIDADE
+# ============================================================
+# Define a sensação de peso do personagem.
+# ============================================================
+
+@export_category("Gravidade")
+
+# Força da gravidade.
+@export var gravidade: float = 1000.0
+
+# Multiplicador da gravidade enquanto o personagem sobe.
+@export_range(0.1, 2.0, 0.05) var gravidade_subindo: float = 1.0
+
+# Multiplicador da gravidade enquanto o personagem cai.
+#
+# Um valor maior pode deixar a queda mais rápida.
+@export_range(0.1, 3.0, 0.05) var gravidade_caindo: float = 1.0
+
+# Limite máximo da velocidade de queda.
+@export var velocidade_maxima_queda: float = 1200.0
 
 
 # ============================================================
 # TOLERÂNCIA DO PULO
 # ============================================================
+# Pequenas tolerâncias ajudam a deixar o controle mais
+# responsivo e consistente.
+# ============================================================
 
 @export_category("Tolerância do Pulo")
 
-# Tempo durante o qual o jogador ainda pode pular depois
-# de sair da plataforma.
-#
-# Esse sistema é conhecido como "Coyote Time".
+# Tempo em que o jogador ainda pode pular depois de
+# abandonar uma plataforma.
 @export_range(0.0, 0.5, 0.01) var tempo_coyote: float = 0.12
 
-# Tempo durante o qual o jogo guarda o comando de pulo
-# caso o jogador pressione o botão um pouco antes de
-# tocar no chão.
-#
-# Esse sistema é conhecido como "Jump Buffer".
+# Tempo em que o comando de pulo fica armazenado caso
+# seja pressionado pouco antes de tocar no chão.
 @export_range(0.0, 0.5, 0.01) var tempo_buffer_pulo: float = 0.12
 
 
 # ============================================================
-# DEBUG
+# CÂMERA
+# ============================================================
+# A câmera acompanha o jogador de maneira suave.
+#
+# Ela não fica presa diretamente à posição do Player.
+# Existe uma área de tolerância antes de começar a seguir.
 # ============================================================
 
-@export_category("Debug")
+@export_category("Câmera")
 
-# Ativa informações do movimento no console da Godot.
-@export var mostrar_debug: bool = false
+# Referência para a Camera2D.
+@export var camera: Camera2D
+
+# Distância horizontal que o jogador pode percorrer
+# antes da câmera começar a acompanhá-lo.
+#
+# Valores maiores deixam a câmera mais "solta".
+@export var margem_horizontal: float = 120.0
+
+# Distância vertical antes da câmera começar a acompanhar.
+@export var margem_vertical: float = 80.0
+
+# Velocidade de acompanhamento horizontal.
+#
+# Valores maiores deixam a câmera mais rápida.
+@export var suavidade_horizontal: float = 5.0
+
+# Velocidade de acompanhamento vertical.
+#
+# Normalmente é interessante deixar menor que a horizontal.
+@export var suavidade_vertical: float = 3.0
+
+# Quantidade de antecipação horizontal.
+#
+# A câmera olha um pouco para frente quando o jogador
+# está se movimentando.
+@export var antecipacao_horizontal: float = 60.0
+
+# Tempo necessário para a antecipação acompanhar
+# a direção do personagem.
+@export var suavidade_antecipacao: float = 4.0
+
+# Ativa ou desativa a antecipação da câmera.
+@export var camera_antecipacao: bool = true
 
 
 # ============================================================
@@ -142,11 +158,23 @@ extends CharacterBody2D
 # Quantidade de pulos utilizados atualmente.
 var pulos_realizados: int = 0
 
-# Tempo restante do Coyote Time.
+# Temporizador do Coyote Time.
 var coyote_timer: float = 0.0
 
-# Tempo restante do Jump Buffer.
+# Temporizador do Jump Buffer.
 var jump_buffer_timer: float = 0.0
+
+# Direção horizontal atual.
+var direcao_horizontal: float = 0.0
+
+# Posição desejada da câmera.
+var camera_alvo: Vector2
+
+# Posição atual da antecipação da câmera.
+var antecipacao_atual: float = 0.0
+
+# Indica se o personagem está correndo.
+var is_running: bool = false
 
 
 # ============================================================
@@ -155,8 +183,14 @@ var jump_buffer_timer: float = 0.0
 
 func _ready() -> void:
 
-	# Inicializa a quantidade de pulos utilizados.
+	# Inicializa a quantidade de pulos.
 	pulos_realizados = 0
+
+	# Verifica se existe uma câmera configurada.
+	if camera != null:
+
+		# Começa a câmera na posição atual.
+		camera_alvo = camera.global_position
 
 
 # ============================================================
@@ -165,7 +199,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 
-	# Atualiza os temporizadores do sistema de movimento.
+	# Atualiza os temporizadores.
 	atualizar_temporizadores(delta)
 
 	# Processa o movimento horizontal.
@@ -177,15 +211,11 @@ func _physics_process(delta: float) -> void:
 	# Processa o pulo.
 	processar_pulo()
 
-	# Aplica o movimento do personagem e verifica colisões.
+	# Move o personagem.
 	move_and_slide()
 
-	# Atualiza o estado do personagem depois do movimento.
+	# Atualiza os pulos disponíveis.
 	atualizar_estado_no_chao()
-
-	# Mostra informações de debug caso esteja ativado.
-	if mostrar_debug:
-		mostrar_informacoes_debug()
 
 
 # ============================================================
@@ -194,56 +224,94 @@ func _physics_process(delta: float) -> void:
 
 func processar_movimento_horizontal(delta: float) -> void:
 
-	# Obtém a direção horizontal utilizando as ações
-	# configuradas no Input Map.
+	# Obtém a direção através das ações configuradas
+	# no Input Map.
 	#
 	# andar_traz   = A / Left
 	# andar_frente = D / Right
-	var direcao := Input.get_axis("andar_traz", "andar_frente")
-
-	# Inverte o controle caso essa opção esteja ativada.
-	if inverter_movimento:
-		direcao *= -1.0
-
-	# Calcula a velocidade desejada.
-	var velocidade_desejada := direcao * velocidade_atual()
-
-	# Caso o jogador esteja pressionando uma direção,
-	# utiliza a aceleração.
-	if direcao != 0.0:
-
-		velocity.x = move_toward(
-			velocity.x,
-			velocidade_desejada,
-			aceleracao * delta
-		)
-
-	# Caso nenhuma direção esteja sendo pressionada,
-	# desacelera o personagem.
-	else:
-
-		velocity.x = move_toward(
-			velocity.x,
-			0.0,
-			desaceleracao * delta
-		)
+	direcao_horizontal = Input.get_axis(
+		"andar_traz",
+		"andar_frente"
+	)
 
 
-# ============================================================
-# VELOCIDADE ATUAL
-# ============================================================
-
-func velocidade_atual() -> float:
+	# ========================================================
+	# CORRIDA
+	# ========================================================
 
 	# Verifica se o jogador está segurando o botão de correr.
-	if Input.is_action_pressed("correr"):
+	is_running = Input.is_action_pressed("correr")
 
-		# Aplica o multiplicador de corrida.
-		return velocidade_maxima * multiplicador_corrida
 
-	# Caso contrário, utiliza a velocidade normal.
-	return velocidade_maxima
+	# ========================================================
+	# VELOCIDADE ATUAL
+	# ========================================================
 
+	var velocidade_atual: float
+
+	# Se estiver correndo, utiliza a velocidade de corrida.
+	if is_running:
+
+		velocidade_atual = velocidade_correndo
+
+	else:
+
+		velocidade_atual = velocidade_normal
+
+
+	# ========================================================
+	# MOVIMENTO NO CHÃO
+	# ========================================================
+
+	if is_on_floor():
+
+		# Existe uma direção sendo pressionada.
+		if direcao_horizontal != 0.0:
+
+			# Acelera suavemente até a velocidade desejada.
+			velocity.x = move_toward(
+				velocity.x,
+				direcao_horizontal * velocidade_atual,
+				aceleracao * delta
+			)
+
+		# Nenhuma direção está sendo pressionada.
+		else:
+
+			# Desacelera suavemente até parar.
+			velocity.x = move_toward(
+				velocity.x,
+				0.0,
+				desaceleracao * delta
+			)
+
+
+	# ========================================================
+	# MOVIMENTO NO AR
+	# ========================================================
+
+	else:
+
+		# Existe uma direção sendo pressionada.
+		if direcao_horizontal != 0.0:
+
+			# Mantém controle sobre o personagem no ar,
+			# utilizando uma porcentagem da aceleração normal.
+			velocity.x = move_toward(
+				velocity.x,
+				direcao_horizontal * velocidade_atual,
+				aceleracao * controle_no_ar * delta
+			)
+
+		# Nenhuma direção está sendo pressionada.
+		else:
+
+			# Desacelera também durante o movimento aéreo.
+			velocity.x = move_toward(
+				velocity.x,
+				0.0,
+				desaceleracao * controle_no_ar * delta
+			)
 
 # ============================================================
 # GRAVIDADE
@@ -251,22 +319,42 @@ func velocidade_atual() -> float:
 
 func processar_gravidade(delta: float) -> void:
 
-	# Se o personagem estiver no chão, não precisamos
-	# aplicar gravidade.
+	# Não aplica gravidade no chão.
 	if is_on_floor():
+
 		return
 
-	# Verifica se o personagem está subindo.
+
+	# ========================================================
+	# SUBIDA
+	# ========================================================
+
 	if velocity.y < 0.0:
 
-		# Aplica a gravidade utilizada durante a subida.
-		velocity.y += gravidade_subindo * delta
+		velocity.y += (
+			gravidade
+			* gravidade_subindo
+			* delta
+		)
 
-	# Caso contrário, o personagem está caindo.
+
+	# ========================================================
+	# QUEDA
+	# ========================================================
+
 	else:
 
-		# Aplica a gravidade utilizada durante a queda.
-		velocity.y += gravidade_caindo * delta
+		velocity.y += (
+			gravidade
+			* gravidade_caindo
+			* delta
+		)
+
+		# Impede uma velocidade de queda exagerada.
+		velocity.y = min(
+			velocity.y,
+			velocidade_maxima_queda
+		)
 
 
 # ============================================================
@@ -275,24 +363,23 @@ func processar_gravidade(delta: float) -> void:
 
 func processar_pulo() -> void:
 
-	# Verifica se o jogador pressionou uma das teclas
-	# associadas à ação "pulo".
-	#
-	# Space / W / Up
+	# Verifica se o jogador pressionou o botão de pulo.
 	if Input.is_action_just_pressed("pulo"):
 
-		# Guarda o comando de pulo durante um pequeno período.
+		# Guarda o comando temporariamente.
 		jump_buffer_timer = tempo_buffer_pulo
 
-	# Caso não exista nenhum comando de pulo armazenado,
-	# não precisamos continuar.
+
+	# Verifica se existe um comando armazenado.
 	if jump_buffer_timer <= 0.0:
+
 		return
 
-	# Verifica se o personagem pode realizar um pulo.
+
+	# Verifica se o jogador pode pular.
 	if pode_pular():
 
-		# Executa o pulo.
+		# Executa o salto.
 		executar_pulo()
 
 		# Consome o comando armazenado.
@@ -300,26 +387,26 @@ func processar_pulo() -> void:
 
 
 # ============================================================
-# VERIFICAÇÃO DO PULO
+# VERIFICAR PULO
 # ============================================================
 
 func pode_pular() -> bool:
 
-	# Permite o pulo normalmente quando o personagem
-	# está sobre uma plataforma.
+	# Pulo normal no chão.
 	if is_on_floor():
+
 		return true
 
-	# Permite o pulo durante o Coyote Time.
+	# Pulo durante o Coyote Time.
 	if coyote_timer > 0.0:
+
 		return true
 
-	# Permite pulos adicionais quando configurados.
+	# Pulos adicionais.
 	if pulos_realizados < quantidade_pulos:
+
 		return true
 
-	# Caso nenhuma condição seja satisfeita,
-	# o personagem não pode pular.
 	return false
 
 
@@ -329,13 +416,13 @@ func pode_pular() -> bool:
 
 func executar_pulo() -> void:
 
-	# Aplica a força vertical do pulo.
-	velocity.y = -forca_pulo
+	# Aplica o impulso vertical.
+	velocity.y = impulso_pulo
 
-	# Registra que um pulo foi utilizado.
+	# Registra o pulo.
 	pulos_realizados += 1
 
-	# Consome o Coyote Time ao realizar o pulo.
+	# Consome o Coyote Time.
 	coyote_timer = 0.0
 
 
@@ -345,36 +432,20 @@ func executar_pulo() -> void:
 
 func _input(event: InputEvent) -> void:
 
-	# Verifica se o sistema de pulo variável está ativado.
+	# Verifica se o pulo variável está ativado.
 	if not pulo_variavel:
+
 		return
 
-	# Verifica se o jogador soltou uma das teclas
-	# associadas à ação "pulo".
+
+	# Verifica se o botão de pulo foi solto.
 	if event.is_action_released("pulo"):
 
 		# Verifica se o personagem ainda está subindo.
 		if velocity.y < 0.0:
 
-			# Reduz a velocidade vertical para encurtar o pulo.
+			# Reduz a velocidade para encurtar o salto.
 			velocity.y *= multiplicador_pulo_curto
-
-
-# ============================================================
-# ATUALIZAÇÃO DOS TEMPORIZADORES
-# ============================================================
-
-func atualizar_temporizadores(delta: float) -> void:
-
-	# Reduz o tempo restante do Coyote Time.
-	if coyote_timer > 0.0:
-
-		coyote_timer -= delta
-
-	# Reduz o tempo restante do Jump Buffer.
-	if jump_buffer_timer > 0.0:
-
-		jump_buffer_timer -= delta
 
 
 # ============================================================
@@ -383,31 +454,25 @@ func atualizar_temporizadores(delta: float) -> void:
 
 func atualizar_estado_no_chao() -> void:
 
-	# Verifica se o personagem está sobre o chão.
+	# Quando toca no chão, restaura os pulos.
 	if is_on_floor():
 
-		# Restaura a quantidade de pulos.
 		pulos_realizados = 0
 
-		# Atualiza o Coyote Time.
-		coyote_timer = tempo_coyote
-
 
 # ============================================================
-# DEBUG
+# TEMPORIZADORES
 # ============================================================
 
-func mostrar_informacoes_debug() -> void:
+func atualizar_temporizadores(delta: float) -> void:
 
-	# Mostra informações importantes do personagem
-	# no console da Godot para facilitar os testes.
-	print(
-		"Velocidade: ",
-		velocity,
-		" | Pulos: ",
-		pulos_realizados,
-		" | Coyote: ",
-		coyote_timer,
-		" | Buffer: ",
-		jump_buffer_timer
-	)
+	# Reduz o Coyote Time.
+	if coyote_timer > 0.0:
+
+		coyote_timer -= delta
+
+
+	# Reduz o Jump Buffer.
+	if jump_buffer_timer > 0.0:
+
+		jump_buffer_timer -= delta

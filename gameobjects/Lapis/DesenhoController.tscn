@@ -1,18 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://dpfqemdgcpo5q"]
+[gd_scene format=3 uid="uid://dpfqemdgcpo5q"]
 
 [ext_resource type="Script" uid="uid://du15iu38n2oam" path="res://scripts/DesenhoController.gd" id="1_057e3"]
 
-[node name="DesenhoController" type="Node2D"]
+[node name="DesenhoController" type="Node2D" unique_id=230707762]
 script = ExtResource("1_057e3")
 
-[node name="Button" type="Button" parent="."]
-offset_left = 1061.0
-offset_top = 575.0
-offset_right = 1123.0
-offset_bottom = 606.0
-text = "apagar
-"
-
-[node name="Line2D" type="Line2D" parent="."]
-
-[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
+[node name="Line2D" type="Line2D" parent="." unique_id=2063459067]
