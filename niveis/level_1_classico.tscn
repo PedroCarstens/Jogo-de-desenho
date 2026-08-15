@@ -1,0 +1,168 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="PackedScene" uid="uid://bhhchg448t5ct" path="res://gameobjects/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://fm66keqjbfnp" path="res://gameobjects/Lapis/lapiz_seguidor.tscn" id="2_lapis"]
+[ext_resource type="PackedScene" uid="uid://dpfqemdgcpo5q" path="res://gameobjects/Lapis/DesenhoController.tscn" id="3_desenho"]
+[ext_resource type="Script" path="res://scripts/player/Camera.gd" id="4_camera"]
+[ext_resource type="Script" path="res://scripts/niveis/LevelMarioStyle.gd" id="5_preset"]
+[ext_resource type="Script" path="res://scripts/ApagarDesenhos.gd" id="6_apagar"]
+[ext_resource type="Script" path="res://scripts/ResetLayout.gd" id="7_reset"]
+
+[sub_resource type="RectangleShape2D" id="GroundShape"]
+size = Vector2(3200, 100)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape1"]
+size = Vector2(180, 32)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape2"]
+size = Vector2(150, 32)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape3"]
+size = Vector2(210, 32)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape4"]
+size = Vector2(120, 32)
+
+[sub_resource type="RectangleShape2D" id="BlockShape"]
+size = Vector2(48, 48)
+
+[sub_resource type="RectangleShape2D" id="PipeShape"]
+size = Vector2(80, 120)
+
+[sub_resource type="StyleBoxFlat" id="ButtonStyle"]
+bg_color = Color(0.15, 0.15, 0.15, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="Level1Classico" type="Node2D"]
+
+[node name="LapizSeguidor" parent="." instance=ExtResource("2_lapis")]
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+position = Vector2(180, 570)
+
+[node name="LevelPreset" type="Node2D" parent="." node_paths=PackedStringArray("jogador")]
+script = ExtResource("5_preset")
+jogador = NodePath("../Player")
+
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("jogador")]
+position = Vector2(180, 400)
+script = ExtResource("4_camera")
+jogador = NodePath("../Player")
+limit_left = 0
+limit_top = 0
+limit_right = 3200
+limit_bottom = 720
+limit_smoothed = true
+
+[node name="DesenhoController" parent="." instance=ExtResource("3_desenho")]
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Ground" type="StaticBody2D" parent="World"]
+position = Vector2(1600, 670)
+
+[node name="Visual" type="Polygon2D" parent="World/Ground"]
+polygon = PackedVector2Array(-1600, -50, 1600, -50, 1600, 50, -1600, 50)
+color = Color(0.35, 0.7, 0.3, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Ground"]
+shape = SubResource("GroundShape")
+
+[node name="Platform1" type="StaticBody2D" parent="World"]
+position = Vector2(680, 530)
+
+[node name="Visual" type="Polygon2D" parent="World/Platform1"]
+polygon = PackedVector2Array(-90, -16, 90, -16, 90, 16, -90, 16)
+color = Color(0.75, 0.45, 0.2, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Platform1"]
+shape = SubResource("PlatformShape1")
+
+[node name="Platform2" type="StaticBody2D" parent="World"]
+position = Vector2(930, 450)
+
+[node name="Visual" type="Polygon2D" parent="World/Platform2"]
+polygon = PackedVector2Array(-75, -16, 75, -16, 75, 16, -75, 16)
+color = Color(0.75, 0.45, 0.2, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Platform2"]
+shape = SubResource("PlatformShape2")
+
+[node name="Block1" type="StaticBody2D" parent="World"]
+position = Vector2(1100, 480)
+
+[node name="Visual" type="Polygon2D" parent="World/Block1"]
+polygon = PackedVector2Array(-24, -24, 24, -24, 24, 24, -24, 24)
+color = Color(0.95, 0.65, 0.15, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Block1"]
+shape = SubResource("BlockShape")
+
+[node name="Block2" type="StaticBody2D" parent="World"]
+position = Vector2(1148, 480)
+
+[node name="Visual" type="Polygon2D" parent="World/Block2"]
+polygon = PackedVector2Array(-24, -24, 24, -24, 24, 24, -24, 24)
+color = Color(0.95, 0.65, 0.15, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Block2"]
+shape = SubResource("BlockShape")
+
+[node name="Platform3" type="StaticBody2D" parent="World"]
+position = Vector2(1370, 540)
+
+[node name="Visual" type="Polygon2D" parent="World/Platform3"]
+polygon = PackedVector2Array(-105, -16, 105, -16, 105, 16, -105, 16)
+color = Color(0.75, 0.45, 0.2, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Platform3"]
+shape = SubResource("PlatformShape3")
+
+[node name="Pipe" type="StaticBody2D" parent="World"]
+position = Vector2(1680, 570)
+
+[node name="Visual" type="Polygon2D" parent="World/Pipe"]
+polygon = PackedVector2Array(-40, -60, 40, -60, 40, 60, -40, 60)
+color = Color(0.2, 0.65, 0.3, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Pipe"]
+shape = SubResource("PipeShape")
+
+[node name="Platform4" type="StaticBody2D" parent="World"]
+position = Vector2(1950, 480)
+
+[node name="Visual" type="Polygon2D" parent="World/Platform4"]
+polygon = PackedVector2Array(-60, -16, 60, -16, 60, 16, -60, 16)
+color = Color(0.75, 0.45, 0.2, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Platform4"]
+shape = SubResource("PlatformShape4")
+
+[node name="Stairs1" type="StaticBody2D" parent="World"]
+position = Vector2(2380, 590)
+
+[node name="Visual" type="Polygon2D" parent="World/Stairs1"]
+polygon = PackedVector2Array(-160, 30, 160, 30, 160, 50, -160, 50, -160, 10, -120, 10, -120, 30, -80, 30, -80, 10, -40, 10, -40, 30, 0, 30, 0, 10, 40, 10, 40, 30, 80, 30, 80, 10, 120, 10, 120, 30, 160, 30)
+color = Color(0.45, 0.45, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Stairs1"]
+position = Vector2(0, 40)
+shape = SubResource("PlatformShape3")
+
+[node name="Interface" type="CanvasLayer" parent="."]
+
+[node name="Button" type="Button" parent="Interface" node_paths=PackedStringArray("desenho_controller")]
+offset_left = 790.0
+offset_top = 600.0
+offset_right = 870.0
+offset_bottom = 636.0
+theme_override_styles/normal = SubResource("ButtonStyle")
+text = "Apagar"
+script = ExtResource("6_apagar")
+desenho_controller = NodePath("../../DesenhoController")
+
+[node name="ResetLayout" type="Node" parent="." ]
+script = ExtResource("7_reset")
