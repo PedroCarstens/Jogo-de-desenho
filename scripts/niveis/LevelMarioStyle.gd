@@ -6,9 +6,8 @@ extends Node2D
 # Considerando 16 subpixels = 1 pixel e 60 FPS, isso corresponde a
 # 90 px/s e 150 px/s neste projeto.
 #
-# A física vertical é adaptada para as unidades da Godot. Assim,
-# preservamos a proporção de subida/queda sem alterar as mecânicas
-# do Player.
+# Este script NÃO altera o Player.gd.
+# Ele aplica um preset somente ao Player desta cena.
 
 @export_category("Movimento do Nível")
 
@@ -30,8 +29,7 @@ extends Node2D
 # Controle aéreo reduzido para preservar a sensação de inércia.
 @export_range(0.0, 1.0, 0.01) var controle_no_ar: float = 0.65
 
-# O salto original começa com aproximadamente -4 px/frame.
-# Convertido para 60 FPS: -240 px/s.
+# Impulso vertical do salto.
 @export var impulso_pulo: float = -240.0
 
 # Gravidade adaptada às unidades da Godot.
@@ -48,9 +46,16 @@ extends Node2D
 
 
 func _ready() -> void:
+	# Aplica depois que todos os nós da fase terminaram de inicializar.
+	# Isso garante que os valores padrão do Player não sobrescrevam
+	# o preset específico desta fase.
+	call_deferred("aplicar_preset")
 
+
+func aplicar_preset() -> void:
 	# Verifica se existe um jogador configurado.
 	if jogador == null:
+		push_warning("LevelMarioStyle: jogador não foi configurado.")
 		return
 
 	# Aplica os valores somente ao jogador desta fase.
@@ -64,3 +69,12 @@ func _ready() -> void:
 	jogador.gravidade_subindo = gravidade_subindo
 	jogador.gravidade_caindo = gravidade_caindo
 	jogador.velocidade_maxima_queda = velocidade_maxima_queda
+
+	# Registra no console quais valores foram aplicados.
+	print("Preset clássico aplicado ao Player:")
+	print("Velocidade normal: ", jogador.velocidade_normal)
+	print("Velocidade corrida: ", jogador.velocidade_correndo)
+	print("Aceleração: ", jogador.aceleracao)
+	print("Desaceleração: ", jogador.desaceleracao)
+	print("Impulso pulo: ", jogador.impulso_pulo)
+	print("Gravidade: ", jogador.gravidade)
