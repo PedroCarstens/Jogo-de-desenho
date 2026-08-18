@@ -3,8 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://bhhchg448t5ct" path="res://gameobjects/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://fm66keqjbfnp" path="res://gameobjects/Lapis/lapiz_seguidor.tscn" id="2_lapis"]
 [ext_resource type="PackedScene" uid="uid://dpfqemdgcpo5q" path="res://gameobjects/Lapis/DesenhoController.tscn" id="3_desenho"]
+[ext_resource type="Script" uid="uid://cehkf4d283jw2" path="res://scripts/player/PlayerMario.gd" id="4_6m5qn"]
 [ext_resource type="Script" uid="uid://6qgcpevec1ck" path="res://scripts/player/Camera.gd" id="4_camera"]
-[ext_resource type="Script" uid="uid://bs0wsmgn0bd7k" path="res://scripts/niveis/LevelMarioStyle.gd" id="5_preset"]
 [ext_resource type="Script" uid="uid://b0ld4ldve45vm" path="res://scripts/ApagarDesenhos.gd" id="6_apagar"]
 [ext_resource type="Script" uid="uid://csqmmgk5yk00u" path="res://scripts/ResetLayout.gd" id="7_reset"]
 
@@ -46,10 +46,24 @@ scale = Vector2(0.12259615, 0.11538462)
 
 [node name="Player" parent="." unique_id=1414301259 instance=ExtResource("1_player")]
 position = Vector2(180, 570)
-
-[node name="LevelPreset" type="Node2D" parent="." unique_id=1537517114 node_paths=PackedStringArray("jogador")]
-script = ExtResource("5_preset")
-jogador = NodePath("../Player")
+script = ExtResource("4_6m5qn")
+velocidade_normal = 90.0
+velocidade_correndo = 150.0
+aceleracao = 600.0
+aceleracao_correndo = 750.0
+desaceleracao = 500.0
+desaceleracao_derrapagem = 900.0
+controle_no_ar = 0.55
+permitir_corrida = true
+exigir_botao_corrida = true
+usar_derrapagem = true
+velocidade_minima_derrapagem = 50.0
+impulso_pulo = -405.0
+multiplicador_pulo_curto = 0.46
+tempo_pulo_alto = 0.28
+gravidade_pulo_seguro = 600.0
+tempo_coyote = 0.08
+tempo_buffer_pulo = 0.1
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=335755785 node_paths=PackedStringArray("jogador")]
 position = Vector2(180, 400)
