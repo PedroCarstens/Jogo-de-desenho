@@ -64,7 +64,15 @@ position = Vector2(279.99997, 568)
 scale = Vector2(0.5599991, 0.5599991)
 script = ExtResource("4_6m5qn")
 
-[node name="RayCast2D" type="RayCast2D" parent="Player" unique_id=604030395]
+[node name="RayCast direito" type="RayCast2D" parent="Player" unique_id=604030395]
+position = Vector2(5.531311e-05, -42.857212)
+scale = Vector2(1.0000001, 1.0000001)
+target_position = Vector2(-12.5000305, -30.357239)
+
+[node name="RayCast esquerdo direito2" type="RayCast2D" parent="Player" unique_id=201045652]
+position = Vector2(28.57155, -42.857216)
+scale = Vector2(1.0000002, 1.0000002)
+target_position = Vector2(14.285706, -30.357239)
 
 [node name="DesenhoController" parent="." unique_id=1179113511 instance=ExtResource("3_desenho")]
 

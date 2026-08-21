@@ -8,9 +8,7 @@ extends CharacterBody2D
 # - Controle aéreo
 # - Coyote Time
 # - Jump Buffer
-#
-# Os valores abaixo foram sincronizados com os valores que estavam
-# configurados no Inspector do Player na cena Level 1 Classico.
+# - Corner Correction usando RayCast2D
 
 
 # ============================================================
@@ -78,8 +76,7 @@ var derrapando: bool = false
 # Força inicial do pulo.
 @export var impulso_pulo: float = -500.0
 
-# Pulo pode ter altura diferente dependendo de quanto
-# tempo o botão é segurado.
+# Permite controlar a altura do pulo segurando o botão.
 @export var pulo_variavel: bool = true
 
 # Multiplicador utilizado quando o botão é solto
@@ -103,8 +100,7 @@ var multiplicador_pulo_curto: float = 0.5
 # Gravidade normal.
 @export var gravidade: float = 850.0
 
-# Gravidade durante a subida quando o botão não está sendo
-# segurado.
+# Gravidade durante a subida.
 @export var gravidade_subindo: float = 1.0
 
 # Gravidade durante a queda.
@@ -125,6 +121,42 @@ var multiplicador_pulo_curto: float = 0.5
 
 # Guarda o comando de pulo por alguns instantes.
 @export var tempo_buffer_pulo: float = 0.10
+
+
+# ============================================================
+# CORNER CORRECTION
+# ============================================================
+# O RayCast2D funciona como sensor da quina.
+#
+# Quando o jogador está subindo e bate na parte inferior
+# de uma quina, o RayCast detecta o obstáculo.
+#
+# Depois usamos test_move() para verificar se existe espaço
+# para deslocar o personagem para cima e continuar o movimento.
+# ============================================================
+
+@export_category("Corner Correction")
+
+# Ativa ou desativa a correção de quina.
+@export var usar_corner_correction: bool = true
+
+# Distância horizontal que o RayCast procura.
+@export_range(0.0, 16.0, 0.5)
+var corner_correction_distancia: float = 6.0
+
+# Altura máxima que o personagem pode ser corrigido.
+@export_range(0.0, 16.0, 0.5)
+var corner_correction_altura: float = 8.0
+
+# Quantidade de tentativas para encontrar espaço.
+@export_range(1, 8, 1)
+var corner_correction_tentativas: int = 4
+
+# Se ativado, a correção só acontece durante a subida.
+@export var corner_correction_apenas_subindo: bool = true
+
+# RayCast2D que você adicionou como filho do Player.
+@onready var corner_raycast: RayCast2D = $RayCast2D
 
 
 # ============================================================
@@ -151,6 +183,15 @@ var jump_buffer_timer: float = 0.0
 
 
 # ============================================================
+# INICIALIZAÇÃO
+# ============================================================
+
+func _ready() -> void:
+	# Garante que o RayCast esteja ativo.
+	corner_raycast.enabled = true
+
+
+# ============================================================
 # PROCESSAMENTO PRINCIPAL
 # ============================================================
 
@@ -167,6 +208,10 @@ func _physics_process(delta: float) -> void:
 
 	# Processa o pulo.
 	processar_pulo()
+
+	# Atualiza o RayCast e tenta corrigir uma quina.
+	atualizar_corner_raycast()
+	aplicar_corner_correction()
 
 	# Move o personagem.
 	move_and_slide()
@@ -190,17 +235,11 @@ func processar_movimento_horizontal(delta: float) -> void:
 		"andar_frente"
 	)
 
-
-	# ========================================================
-	# CORRIDA
-	# ========================================================
-
 	# Shift determina se o personagem está correndo.
 	if permitir_corrida:
 		is_running = Input.is_action_pressed("correr")
 	else:
 		is_running = false
-
 
 	# Define a velocidade máxima.
 	var velocidade_alvo: float
@@ -210,16 +249,10 @@ func processar_movimento_horizontal(delta: float) -> void:
 	else:
 		velocidade_alvo = velocidade_normal
 
-
-	# ========================================================
-	# SEM MOVIMENTO
-	# ========================================================
-
+	# Sem movimento: desacelera naturalmente.
 	if direcao_horizontal == 0.0:
-
 		derrapando = false
 
-		# Desacelera naturalmente.
 		velocity.x = move_toward(
 			velocity.x,
 			0.0,
@@ -228,30 +261,19 @@ func processar_movimento_horizontal(delta: float) -> void:
 
 		return
 
-
-	# ========================================================
-	# DETECTAR INVERSÃO
-	# ========================================================
-
+	# Detecta inversão da direção.
 	var invertendo_direcao: bool = (
 		velocity.x != 0.0
 		and sign(velocity.x) != direcao_horizontal
 	)
 
-
-	# ========================================================
-	# DERRAPAGEM
-	# ========================================================
-
+	# Derrapagem no chão ao inverter em velocidade suficiente.
 	if (
 		usar_derrapagem
 		and is_on_floor()
 		and invertendo_direcao
 		and abs(velocity.x) >= velocidade_minima_derrapagem
 	):
-
-		# O personagem ainda mantém parte da velocidade antiga
-		# enquanto começa a inverter a direção.
 		derrapando = true
 
 		velocity.x = move_toward(
@@ -262,15 +284,9 @@ func processar_movimento_horizontal(delta: float) -> void:
 
 		return
 
-
-	# Quando deixa de inverter, termina a derrapagem.
 	derrapando = false
 
-
-	# ========================================================
-	# MOVIMENTO NO CHÃO
-	# ========================================================
-
+	# Movimento no chão.
 	if is_on_floor():
 
 		var aceleracao_atual: float
@@ -280,21 +296,15 @@ func processar_movimento_horizontal(delta: float) -> void:
 		else:
 			aceleracao_atual = aceleracao
 
-		# Acelera até a velocidade desejada.
 		velocity.x = move_toward(
 			velocity.x,
 			direcao_horizontal * velocidade_alvo,
 			aceleracao_atual * delta
 		)
 
-
-	# ========================================================
-	# MOVIMENTO NO AR
-	# ========================================================
-
+	# Movimento no ar.
 	else:
 
-		# O controle aéreo é menor.
 		velocity.x = move_toward(
 			velocity.x,
 			direcao_horizontal * velocidade_alvo,
@@ -312,15 +322,9 @@ func processar_gravidade(delta: float) -> void:
 	if is_on_floor():
 		return
 
-
-	# ========================================================
-	# SUBIDA
-	# ========================================================
-
+	# Subida.
 	if velocity.y < 0.0:
 
-		# Enquanto o jogador estiver segurando o botão,
-		# a gravidade é menor e o salto fica mais alto.
 		if (
 			pulando
 			and Input.is_action_pressed("pulo")
@@ -337,11 +341,7 @@ func processar_gravidade(delta: float) -> void:
 				* delta
 			)
 
-
-	# ========================================================
-	# QUEDA
-	# ========================================================
-
+	# Queda.
 	else:
 
 		velocity.y += (
@@ -350,7 +350,6 @@ func processar_gravidade(delta: float) -> void:
 			* delta
 		)
 
-		# Limita a velocidade máxima da queda.
 		velocity.y = min(
 			velocity.y,
 			velocidade_maxima_queda
@@ -367,26 +366,17 @@ func processar_pulo() -> void:
 	if Input.is_action_just_pressed("pulo"):
 		jump_buffer_timer = tempo_buffer_pulo
 
-	# Não existe comando armazenado.
 	if jump_buffer_timer <= 0.0:
 		return
 
-	# Verifica se pode pular.
 	if pode_pular():
 
-		# Aplica o impulso.
 		velocity.y = impulso_pulo
 
-		# Começa o controle do salto.
 		pulando = true
-
-		# Zera o contador.
 		tempo_pulo = 0.0
 
-		# Consome o comando.
 		jump_buffer_timer = 0.0
-
-		# Consome o Coyote Time.
 		coyote_timer = 0.0
 
 
@@ -396,11 +386,9 @@ func processar_pulo() -> void:
 
 func pode_pular() -> bool:
 
-	# Pulo normal no chão.
 	if is_on_floor():
 		return true
 
-	# Pulo durante o Coyote Time.
 	if coyote_timer > 0.0:
 		return true
 
@@ -413,22 +401,92 @@ func pode_pular() -> bool:
 
 func _input(event: InputEvent) -> void:
 
-	# Verifica se o pulo variável está ativado.
 	if not pulo_variavel:
 		return
 
-	# ========================================================
-	# SOLTAR O BOTÃO
-	# ========================================================
-
 	if event.is_action_released("pulo"):
 
-		# Se ainda estiver subindo, corta o salto.
 		if velocity.y < 0.0:
 			velocity.y *= multiplicador_pulo_curto
 
-		# O salto deixa de ser prolongado.
 		pulando = false
+
+
+# ============================================================
+# ATUALIZAR RAYCAST
+# ============================================================
+
+func atualizar_corner_raycast() -> void:
+
+	# O RayCast aponta para o lado em que o Player está andando.
+	corner_raycast.target_position = Vector2(
+		direcao_horizontal * corner_correction_distancia,
+		0.0
+	)
+
+	# Atualiza a detecção imediatamente.
+	corner_raycast.force_raycast_update()
+
+
+# ============================================================
+# CORNER CORRECTION
+# ============================================================
+
+func aplicar_corner_correction() -> void:
+
+	# Se estiver desativado no Inspector, não faz nada.
+	if not usar_corner_correction:
+		return
+
+	# A correção só é necessária durante a subida.
+	if (
+		corner_correction_apenas_subindo
+		and velocity.y >= 0.0
+	):
+		return
+
+	# Sem movimento horizontal não existe quina para corrigir.
+	if direcao_horizontal == 0.0:
+		return
+
+	# O RayCast precisa detectar um obstáculo.
+	if not corner_raycast.is_colliding():
+		return
+
+	# Procura pequenos deslocamentos para cima.
+	for i in range(
+		1,
+		corner_correction_tentativas + 1
+	):
+
+		var passo: float = (
+			corner_correction_altura
+			* float(i)
+			/ float(corner_correction_tentativas)
+		)
+
+		# Cria uma posição temporária acima do Player.
+		var transformacao_teste := global_transform
+
+		transformacao_teste.origin.y -= passo
+
+		# Testa se existe espaço para continuar andando.
+		var deslocamento_horizontal := Vector2(
+			direcao_horizontal
+			* corner_correction_distancia,
+			0.0
+		)
+
+		if not test_move(
+			transformacao_teste,
+			deslocamento_horizontal
+		):
+
+			# Existe espaço.
+			# Move o Player para cima.
+			global_position.y -= passo
+
+			return
 
 
 # ============================================================
