@@ -152,7 +152,7 @@ var corner_correction_tentativas: int = 4
 
 # Os nomes correspondem exatamente aos RayCast2D da cena atual.
 @onready var corner_raycast_direito: RayCast2D = $"RayCast direito"
-@onready var corner_raycast_esquerdo: RayCast2D = $"RayCast esquerdo direito2"
+@onready var corner_raycast_esquerdo: RayCast2D = $"RayCast esquerdo"
 
 
 # ============================================================
