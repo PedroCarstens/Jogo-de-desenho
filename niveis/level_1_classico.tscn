@@ -64,6 +64,8 @@ position = Vector2(279.99997, 568)
 scale = Vector2(0.5599991, 0.5599991)
 script = ExtResource("4_6m5qn")
 
+[node name="RayCast2D" type="RayCast2D" parent="Player" unique_id=604030395]
+
 [node name="DesenhoController" parent="." unique_id=1179113511 instance=ExtResource("3_desenho")]
 
 [node name="World" type="Node2D" parent="." unique_id=281830053]
