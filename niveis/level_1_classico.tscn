@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://cehkf4d283jw2" path="res://scripts/player/PlayerMario.gd" id="4_6m5qn"]
 [ext_resource type="Script" uid="uid://b0ld4ldve45vm" path="res://scripts/ApagarDesenhos.gd" id="6_apagar"]
 [ext_resource type="Script" uid="uid://csqmmgk5yk00u" path="res://scripts/ResetLayout.gd" id="7_reset"]
-[ext_resource type="Script" path="res://scripts/player/CameraMario.gd" id="8_camera"]
+[ext_resource type="Script" uid="uid://dloentijq6e6k" path="res://scripts/player/CameraMario.gd" id="8_camera"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_dhw7d"]
 load_path = "res://.godot/imported/super-mario-bros-world-1-1-v0-uyb8eswm7ff21.webp-9ff5ddd5504e4679d8be2539231c8194.ctex"
@@ -47,19 +47,6 @@ corner_radius_bottom_left = 6
 [node name="Camera2D" type="Camera2D" parent="." unique_id=565574625]
 position = Vector2(432, 360)
 script = ExtResource("8_camera")
-zoom_mario = Vector2(2, 2)
-centro_horizontal = 0.5
-centro_vertical = 0.5
-margem_horizontal = 0.2
-margem_vertical = 0.3
-acompanhar_vertical = true
-usar_suavizacao = false
-travar_recuo_horizontal = true
-usar_limites = true
-limite_esquerdo = 0.0
-limite_superior = 0.0
-limite_direito = 3704.0
-limite_inferior = 720.0
 
 [node name="SuperMarioBrosWorld11V0Uyb8Eswm7Ff21" type="Sprite2D" parent="." unique_id=864465250]
 position = Vector2(3704.0002, 32.000008)
@@ -73,7 +60,8 @@ position = Vector2(-1, -2)
 scale = Vector2(0.12259615, 0.11538462)
 
 [node name="Player" parent="." unique_id=1414301259 instance=ExtResource("1_player")]
-position = Vector2(208, 552)
+position = Vector2(279.99997, 568)
+scale = Vector2(0.5599991, 0.5599991)
 script = ExtResource("4_6m5qn")
 
 [node name="DesenhoController" parent="." unique_id=1179113511 instance=ExtResource("3_desenho")]
