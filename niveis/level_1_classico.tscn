@@ -63,9 +63,8 @@ scale = Vector2(0.12259615, 0.11538462)
 position = Vector2(279.99997, 568)
 scale = Vector2(0.5599991, 0.5599991)
 script = ExtResource("4_6m5qn")
-corner_correction_altura = 16.0
-corner_correction_distancia = 16.0
-corner_correction_tentativas = 8
+corner_correction_distancia = 24.0
+corner_correction_altura = 32.0
 
 [node name="RayCast esquerdo" type="RayCast2D" parent="Player" unique_id=604030395]
 position = Vector2(5.531311e-05, -33.928627)
