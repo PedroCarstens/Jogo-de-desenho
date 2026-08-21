@@ -4,30 +4,35 @@
 [ext_resource type="PackedScene" uid="uid://fm66keqjbfnp" path="res://gameobjects/Lapis/lapiz_seguidor.tscn" id="2_lapis"]
 [ext_resource type="PackedScene" uid="uid://dpfqemdgcpo5q" path="res://gameobjects/Lapis/DesenhoController.tscn" id="3_desenho"]
 [ext_resource type="Script" uid="uid://cehkf4d283jw2" path="res://scripts/player/PlayerMario.gd" id="4_6m5qn"]
-[ext_resource type="Script" uid="uid://6qgcpevec1ck" path="res://scripts/player/Camera.gd" id="4_camera"]
 [ext_resource type="Script" uid="uid://b0ld4ldve45vm" path="res://scripts/ApagarDesenhos.gd" id="6_apagar"]
 [ext_resource type="Script" uid="uid://csqmmgk5yk00u" path="res://scripts/ResetLayout.gd" id="7_reset"]
 
-[sub_resource type="RectangleShape2D" id="GroundShape"]
-size = Vector2(3200, 100)
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_dhw7d"]
+load_path = "res://.godot/imported/super-mario-bros-world-1-1-v0-uyb8eswm7ff21.webp-9ff5ddd5504e4679d8be2539231c8194.ctex"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uqg3t"]
+size = Vector2(2429.6016, 89.1001)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4csso"]
+size = Vector2(3258.9473, 84.5)
 
 [sub_resource type="RectangleShape2D" id="PlatformShape1"]
-size = Vector2(180, 32)
-
-[sub_resource type="RectangleShape2D" id="PlatformShape2"]
-size = Vector2(150, 32)
+size = Vector2(182.5, 40)
 
 [sub_resource type="RectangleShape2D" id="BlockShape"]
 size = Vector2(48, 48)
 
-[sub_resource type="RectangleShape2D" id="PlatformShape3"]
-size = Vector2(210, 32)
-
 [sub_resource type="RectangleShape2D" id="PipeShape"]
-size = Vector2(80, 120)
+size = Vector2(72, 84)
 
-[sub_resource type="RectangleShape2D" id="PlatformShape4"]
-size = Vector2(120, 32)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jufdb"]
+size = Vector2(71.99835, 136.10556)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_aeoly"]
+size = Vector2(76.047516, 176.20119)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nbja0"]
+size = Vector2(72, 177)
 
 [sub_resource type="StyleBoxFlat" id="ButtonStyle"]
 bg_color = Color(0.15, 0.15, 0.15, 0.9)
@@ -38,6 +43,14 @@ corner_radius_bottom_left = 6
 
 [node name="Level1Classico" type="Node2D" unique_id=71805475]
 
+[node name="Camera2D" type="Camera2D" parent="." unique_id=565574625]
+position = Vector2(432, 360)
+
+[node name="SuperMarioBrosWorld11V0Uyb8Eswm7Ff21" type="Sprite2D" parent="." unique_id=864465250]
+position = Vector2(3704.0002, 32.000008)
+scale = Vector2(2.2476635, 2.7)
+texture = SubResource("CompressedTexture2D_dhw7d")
+
 [node name="LapizSeguidor" parent="." unique_id=1705051086 instance=ExtResource("2_lapis")]
 
 [node name="Sprite2D" parent="LapizSeguidor" index="0"]
@@ -45,72 +58,48 @@ position = Vector2(-1, -2)
 scale = Vector2(0.12259615, 0.11538462)
 
 [node name="Player" parent="." unique_id=1414301259 instance=ExtResource("1_player")]
-position = Vector2(180, 570)
+position = Vector2(208, 552)
 script = ExtResource("4_6m5qn")
-velocidade_normal = 90.0
-velocidade_correndo = 150.0
-aceleracao = 600.0
-aceleracao_correndo = 750.0
-desaceleracao = 500.0
-desaceleracao_derrapagem = 900.0
-controle_no_ar = 0.55
-permitir_corrida = true
-exigir_botao_corrida = true
-usar_derrapagem = true
-velocidade_minima_derrapagem = 50.0
-impulso_pulo = -405.0
-multiplicador_pulo_curto = 0.46
-tempo_pulo_alto = 0.28
-gravidade_pulo_seguro = 600.0
-tempo_coyote = 0.08
-tempo_buffer_pulo = 0.1
-
-[node name="Camera2D" type="Camera2D" parent="." unique_id=335755785 node_paths=PackedStringArray("jogador")]
-position = Vector2(180, 400)
-limit_left = 0
-limit_top = 0
-limit_right = 3200
-limit_bottom = 720
-limit_smoothed = true
-script = ExtResource("4_camera")
-jogador = NodePath("../Player")
+velocidade_normal = 180.0
+velocidade_correndo = 290.0
+aceleracao = 690.0
+aceleracao_correndo = 800.0
+velocidade_minima_derrapagem = 90.0
+impulso_pulo = -500.0
+multiplicador_pulo_curto = 0.5
+tempo_pulo_alto = 0.3
+tempo_coyote = 0.11
 
 [node name="DesenhoController" parent="." unique_id=1179113511 instance=ExtResource("3_desenho")]
 
 [node name="World" type="Node2D" parent="." unique_id=281830053]
 
+[node name="Ground2" type="StaticBody2D" parent="World" unique_id=1268853385]
+position = Vector2(2591.9998, 672)
+scale = Vector2(0.2206122, 1.011377)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Ground2" unique_id=1405861077]
+position = Vector2(380.75977, -34.55005)
+scale = Vector2(1.0000004, 1)
+shape = SubResource("RectangleShape2D_uqg3t")
+
 [node name="Ground" type="StaticBody2D" parent="World" unique_id=1680209636]
-position = Vector2(1600, 670)
+position = Vector2(938, 673)
+scale = Vector2(0.76, 1)
 
-[node name="Visual" type="Polygon2D" parent="World/Ground" unique_id=908913609]
-color = Color(0.35, 0.7, 0.3, 1)
-polygon = PackedVector2Array(-1600, -50, 1600, -50, 1600, 50, -1600, 50)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Ground" unique_id=2133703001]
-shape = SubResource("GroundShape")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Ground" unique_id=2003820910]
+position = Vector2(209.99976, -35.25)
+shape = SubResource("RectangleShape2D_4csso")
 
 [node name="Platform1" type="StaticBody2D" parent="World" unique_id=1005497285]
-position = Vector2(680, 530)
-
-[node name="Visual" type="Polygon2D" parent="World/Platform1" unique_id=71633014]
-color = Color(0.75, 0.45, 0.2, 1)
-polygon = PackedVector2Array(-90, -16, 90, -16, 90, 16, -90, 16)
+position = Vector2(663, 440)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="World/Platform1" unique_id=1959967215]
+position = Vector2(5.75, 0)
 shape = SubResource("PlatformShape1")
 
-[node name="Platform2" type="StaticBody2D" parent="World" unique_id=557171536]
-position = Vector2(930, 450)
-
-[node name="Visual" type="Polygon2D" parent="World/Platform2" unique_id=1404697219]
-color = Color(0.75, 0.45, 0.2, 1)
-polygon = PackedVector2Array(-75, -16, 75, -16, 75, 16, -75, 16)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Platform2" unique_id=2104280244]
-shape = SubResource("PlatformShape2")
-
 [node name="Block1" type="StaticBody2D" parent="World" unique_id=952409179]
-position = Vector2(1100, 480)
+position = Vector2(448, 440)
 
 [node name="Visual" type="Polygon2D" parent="World/Block1" unique_id=247966133]
 color = Color(0.95, 0.65, 0.15, 1)
@@ -120,7 +109,7 @@ polygon = PackedVector2Array(-24, -24, 24, -24, 24, 24, -24, 24)
 shape = SubResource("BlockShape")
 
 [node name="Block2" type="StaticBody2D" parent="World" unique_id=1458910811]
-position = Vector2(1148, 480)
+position = Vector2(672, 272)
 
 [node name="Visual" type="Polygon2D" parent="World/Block2" unique_id=1251583692]
 color = Color(0.95, 0.65, 0.15, 1)
@@ -129,46 +118,34 @@ polygon = PackedVector2Array(-24, -24, 24, -24, 24, 24, -24, 24)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="World/Block2" unique_id=1300682769]
 shape = SubResource("BlockShape")
 
-[node name="Platform3" type="StaticBody2D" parent="World" unique_id=520660170]
-position = Vector2(1370, 540)
-
-[node name="Visual" type="Polygon2D" parent="World/Platform3" unique_id=1385199253]
-color = Color(0.75, 0.45, 0.2, 1)
-polygon = PackedVector2Array(-105, -16, 105, -16, 105, 16, -105, 16)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Platform3" unique_id=2067122886]
-shape = SubResource("PlatformShape3")
-
 [node name="Pipe" type="StaticBody2D" parent="World" unique_id=40827566]
-position = Vector2(1680, 570)
-
-[node name="Visual" type="Polygon2D" parent="World/Pipe" unique_id=626161231]
-color = Color(0.2, 0.65, 0.3, 1)
-polygon = PackedVector2Array(-40, -60, 40, -60, 40, 60, -40, 60)
+position = Vector2(896, 536)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="World/Pipe" unique_id=230926798]
+position = Vector2(4, 16)
 shape = SubResource("PipeShape")
 
-[node name="Platform4" type="StaticBody2D" parent="World" unique_id=1166698302]
-position = Vector2(1950, 480)
+[node name="Pipe2" type="StaticBody2D" parent="World" unique_id=1196825783]
+position = Vector2(1264.0001, 520.00006)
+rotation = 0.006795302
 
-[node name="Visual" type="Polygon2D" parent="World/Platform4" unique_id=1994875982]
-color = Color(0.75, 0.45, 0.2, 1)
-polygon = PackedVector2Array(-60, -16, 60, -16, 60, 16, -60, 16)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Pipe2" unique_id=722305675]
+position = Vector2(-7.9455996, 8.054146)
+shape = SubResource("RectangleShape2D_jufdb")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Platform4" unique_id=702170553]
-shape = SubResource("PlatformShape4")
+[node name="Pipe3" type="StaticBody2D" parent="World" unique_id=1967510051]
+position = Vector2(1452, 564)
+rotation = 0.013590604
 
-[node name="Stairs1" type="StaticBody2D" parent="World" unique_id=2069222522]
-position = Vector2(2380, 590)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Pipe3" unique_id=1568238058]
+position = Vector2(93.2572, -53.13681)
+shape = SubResource("RectangleShape2D_aeoly")
 
-[node name="Visual" type="Polygon2D" parent="World/Stairs1" unique_id=1286010512]
-color = Color(0.45, 0.45, 0.5, 1)
-polygon = PackedVector2Array(-160, 30, 160, 30, 160, 50, -160, 50, -160, 10, -120, 10, -120, 30, -80, 30, -80, 10, -40, 10, -40, 30, 0, 30, 0, 10, 40, 10, 40, 30, 80, 30, 80, 10, 120, 10, 120, 30, 160, 30)
+[node name="Pipe4" type="StaticBody2D" parent="World" unique_id=322269504]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Stairs1" unique_id=1826919395]
-position = Vector2(0, 40)
-shape = SubResource("PlatformShape3")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Pipe4" unique_id=704243092]
+position = Vector2(1944, 512)
+shape = SubResource("RectangleShape2D_nbja0")
 
 [node name="Interface" type="CanvasLayer" parent="." unique_id=1894412304]
 

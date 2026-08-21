@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cl5m6fst7ga2m" path="res://gameobjects/placeholders/grass(placeholder).tscn" id="1_loh58"]
 [ext_resource type="PackedScene" uid="uid://bhhchg448t5ct" path="res://gameobjects/player/player.tscn" id="2_nrgl5"]
+[ext_resource type="Script" uid="uid://ckv4vyvrg6lm1" path="res://scripts/player/Player.gd" id="3_cqvk4"]
 [ext_resource type="PackedScene" uid="uid://fm66keqjbfnp" path="res://gameobjects/Lapis/lapiz_seguidor.tscn" id="3_nrgl5"]
 [ext_resource type="PackedScene" uid="uid://dpfqemdgcpo5q" path="res://gameobjects/Lapis/DesenhoController.tscn" id="4_sclhy"]
 [ext_resource type="Script" uid="uid://6qgcpevec1ck" path="res://scripts/player/Camera.gd" id="5_trhll"]
@@ -17,6 +18,7 @@ scale = Vector2(0.44, 0.44)
 
 [node name="Player" parent="." unique_id=1291541874 instance=ExtResource("2_nrgl5")]
 position = Vector2(186, 442)
+script = ExtResource("3_cqvk4")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1035628458 node_paths=PackedStringArray("jogador")]
 position = Vector2(288, 318)
