@@ -125,9 +125,13 @@ var multiplicador_pulo_curto: float = 0.5
 # ============================================================
 # CORNER CORRECTION
 # ============================================================
-# Os dois RayCast2D ficam nos cantos superiores do Player.
-# Eles detectam a quina durante a subida.
-# Depois test_move() verifica se existe espaço para subir.
+# A correção de quina não muda a direção do input.
+# Ela desloca o Player alguns pixels para o lado livre quando
+# somente um dos cantos superiores encontra uma plataforma.
+# Isso evita o "head bonk" e permite que o salto continue.
+#
+# Os RayCast2D são posicionados automaticamente nos cantos da
+# CollisionShape2D e apontam para cima.
 # ============================================================
 
 @export_category("Corner Correction")
@@ -135,24 +139,31 @@ var multiplicador_pulo_curto: float = 0.5
 # Ativa ou desativa a correção de quina.
 @export var usar_corner_correction: bool = true
 
-# Altura máxima que o personagem pode ser corrigido.
-@export_range(0.0, 16.0, 0.5)
-var corner_correction_altura: float = 8.0
+# Distância máxima que o Player pode ser deslocado para o lado.
+@export_range(0.0, 24.0, 0.5)
+var corner_correction_distancia: float = 16.0
 
-# Distância horizontal usada no teste de passagem.
-@export_range(0.0, 16.0, 0.5)
-var corner_correction_distancia: float = 6.0
+# Comprimento dos RayCast2D para detectar o teto.
+@export_range(1.0, 32.0, 0.5)
+var corner_correction_altura: float = 16.0
 
-# Quantidade de tentativas para encontrar espaço.
-@export_range(1, 8, 1)
-var corner_correction_tentativas: int = 4
+# Quantidade de pequenos testes usados na correção.
+@export_range(1, 16, 1)
+var corner_correction_tentativas: int = 8
 
-# Se ativado, a correção só acontece durante a subida.
+# A correção só acontece enquanto o Player está subindo.
 @export var corner_correction_apenas_subindo: bool = true
+
+# Espaço entre o RayCast e a borda exata da CollisionShape2D.
+@export_range(0.0, 4.0, 0.5)
+var corner_correction_margem: float = 1.0
 
 # Os nomes correspondem exatamente aos RayCast2D da cena atual.
 @onready var corner_raycast_direito: RayCast2D = $"RayCast direito"
 @onready var corner_raycast_esquerdo: RayCast2D = $"RayCast esquerdo"
+
+# Colisão usada para posicionar automaticamente os dois Rays.
+@onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 
 # ============================================================
@@ -186,6 +197,38 @@ func _ready() -> void:
 	# Garante que os dois sensores estejam ativos.
 	corner_raycast_direito.enabled = true
 	corner_raycast_esquerdo.enabled = true
+
+	# Posiciona os Rays automaticamente nos cantos da colisão.
+	configurar_corner_rays()
+
+
+# ============================================================
+# CONFIGURAR RAYCASTS
+# ============================================================
+
+func configurar_corner_rays() -> void:
+	# A configuração automática evita depender das posições antigas
+	# que estavam salvas na cena.
+	if collision_shape.shape is RectangleShape2D:
+		var forma: RectangleShape2D = collision_shape.shape
+		var metade_x: float = forma.size.x * 0.5
+		var metade_y: float = forma.size.y * 0.5
+		var centro: Vector2 = collision_shape.position
+
+		var topo_y: float = centro.y - metade_y + corner_correction_margem
+		var esquerda_x: float = centro.x - metade_x + corner_correction_margem
+		var direita_x: float = centro.x + metade_x - corner_correction_margem
+
+		corner_raycast_esquerdo.position = Vector2(esquerda_x, topo_y)
+		corner_raycast_direito.position = Vector2(direita_x, topo_y)
+
+	# Os dois Rays apontam verticalmente para cima.
+	# A direção horizontal é determinada pelo lado que colidir.
+	corner_raycast_esquerdo.target_position = Vector2(0.0, -corner_correction_altura)
+	corner_raycast_direito.target_position = Vector2(0.0, -corner_correction_altura)
+
+	corner_raycast_esquerdo.force_raycast_update()
+	corner_raycast_direito.force_raycast_update()
 
 
 # ============================================================
@@ -344,49 +387,79 @@ func aplicar_corner_correction() -> void:
 	if not usar_corner_correction:
 		return
 
-	# Corner Correction funciona durante a subida.
+	# Corner Correction é uma ajuda para o salto.
+	# Não deve atuar durante a queda.
 	if corner_correction_apenas_subindo and velocity.y >= 0.0:
 		return
 
-	# Sem movimento horizontal não existe direção para corrigir.
+	# Sem movimento horizontal não há um lado preferencial.
 	if direcao_horizontal == 0.0:
 		return
 
-	# Usa somente o RayCast correspondente ao lado do movimento.
-	var raycast: RayCast2D
+	# Atualiza os dois sensores.
+	corner_raycast_esquerdo.force_raycast_update()
+	corner_raycast_direito.force_raycast_update()
 
-	if direcao_horizontal > 0.0:
-		raycast = corner_raycast_direito
-	else:
-		raycast = corner_raycast_esquerdo
+	var esquerdo_bateu: bool = corner_raycast_esquerdo.is_colliding()
+	var direito_bateu: bool = corner_raycast_direito.is_colliding()
 
-	raycast.force_raycast_update()
-
-	# Não há obstáculo no canto.
-	if not raycast.is_colliding():
+	# Se os dois cantos estão presos no teto, não existe espaço lateral
+	# suficiente para uma correção segura.
+	if esquerdo_bateu and direito_bateu:
 		return
 
-	# Testa pequenas alturas até encontrar uma posição livre.
+	# A correção é feita para o lado livre.
+	var direcao_correcao: float = 0.0
+
+	# Indo para a direita e o canto direito bateu:
+	# desloca alguns pixels para a esquerda.
+	if direcao_horizontal > 0.0 and direito_bateu and not esquerdo_bateu:
+		direcao_correcao = -1.0
+
+	# Indo para a esquerda e o canto esquerdo bateu:
+	# desloca alguns pixels para a direita.
+	elif direcao_horizontal < 0.0 and esquerdo_bateu and not direito_bateu:
+		direcao_correcao = 1.0
+
+	if direcao_correcao == 0.0:
+		return
+
+	# Guarda a posição original para poder testar cada tentativa.
+	var posicao_original: Vector2 = global_position
+	var transformacao_original: Transform2D = global_transform
+
+	# Procura a menor correção que tira o canto da plataforma.
 	for i in range(1, corner_correction_tentativas + 1):
 		var passo: float = (
-			corner_correction_altura
+			corner_correction_distancia
 			* float(i)
 			/ float(corner_correction_tentativas)
 		)
 
-		var transformacao_teste := global_transform
-		transformacao_teste.origin.y -= passo
-
-		# Verifica se o corpo inteiro consegue avançar
-		# depois de subir essa quantidade.
 		var deslocamento := Vector2(
-			direcao_horizontal * corner_correction_distancia,
+			direcao_correcao * passo,
 			0.0
 		)
 
-		if not test_move(transformacao_teste, deslocamento):
-			global_position.y -= passo
+		# Não corrige para dentro de outro obstáculo.
+		if test_move(transformacao_original, deslocamento):
+			continue
+
+		# Testa a posição candidata com os RayCast2D.
+		global_position = posicao_original + deslocamento
+
+		corner_raycast_esquerdo.force_raycast_update()
+		corner_raycast_direito.force_raycast_update()
+
+		var novo_esquerdo: bool = corner_raycast_esquerdo.is_colliding()
+		var novo_direito: bool = corner_raycast_direito.is_colliding()
+
+		# O lado que estava preso ficou livre.
+		if not novo_esquerdo and not novo_direito:
 			return
+
+	# Nenhuma posição testada foi segura.
+	global_position = posicao_original
 
 
 # ============================================================
