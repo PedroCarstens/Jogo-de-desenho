@@ -9,6 +9,7 @@ extends CharacterBody2D
 # - Coyote Time
 # - Jump Buffer
 # - Corner Correction usando dois RayCast2D
+# - Debug de movimentação para facilitar testes no desenvolvimento
 
 
 # ============================================================
@@ -33,7 +34,6 @@ extends CharacterBody2D
 @export var desaceleracao: float = 500.0
 
 # Desaceleração ao inverter a direção.
-# É o que cria a sensação de derrapagem.
 @export var desaceleracao_derrapagem: float = 900.0
 
 # Controle horizontal no ar.
@@ -167,6 +167,46 @@ var corner_correction_margem: float = 1.0
 
 
 # ============================================================
+# DEBUG / QUALIDADE DE VIDA
+# ============================================================
+# Ferramentas de diagnóstico para acompanhar a movimentação
+# sem precisar alterar a lógica de física.
+#
+# Os prints acontecem em eventos importantes e não a cada frame,
+# evitando encher o Output do Godot desnecessariamente.
+# ============================================================
+
+@export_category("Debug - Qualidade de Vida")
+
+# Liga ou desliga todos os prints de diagnóstico.
+@export var debug_movimento: bool = true
+
+# Mostra mudanças de direção e velocidade horizontal.
+@export var debug_horizontal: bool = true
+
+# Mostra eventos relacionados ao pulo.
+@export var debug_pulo: bool = true
+
+# Mostra eventos relacionados à gravidade e estado no ar.
+@export var debug_gravidade: bool = true
+
+# Mostra eventos do Coyote Time e Jump Buffer.
+@export var debug_temporizadores: bool = true
+
+# Mostra detecção e aplicação do Corner Correction.
+@export var debug_corner_correction: bool = true
+
+# Evita repetir mensagens de estado que não mudaram.
+var debug_direcao_anterior: float = 0.0
+var debug_corrida_anterior: bool = false
+var debug_no_chao_anterior: bool = false
+var debug_subindo_anterior: bool = false
+var debug_derrapando_anterior: bool = false
+var debug_buffer_ativo_anterior: bool = false
+var debug_coyote_ativo_anterior: bool = false
+
+
+# ============================================================
 # VARIÁVEIS INTERNAS
 # ============================================================
 
@@ -190,16 +230,29 @@ var jump_buffer_timer: float = 0.0
 
 
 # ============================================================
+# FUNÇÃO DE DEBUG
+# ============================================================
+
+func debug_print(mensagem: String) -> void:
+	if debug_movimento:
+		print("[PLAYER DEBUG] ", mensagem)
+
+
+# ============================================================
 # INICIALIZAÇÃO
 # ============================================================
 
 func _ready() -> void:
-	# Garante que os dois sensores estejam ativos.
 	corner_raycast_direito.enabled = true
 	corner_raycast_esquerdo.enabled = true
 
-	# Posiciona os Rays automaticamente nos cantos da colisão.
 	configurar_corner_rays()
+
+	debug_no_chao_anterior = is_on_floor()
+	debug_print("PlayerMario iniciado.")
+	debug_print("Velocidade normal: " + str(velocidade_normal))
+	debug_print("Velocidade corrida: " + str(velocidade_correndo))
+	debug_print("Corner Correction: " + ("ATIVADO" if usar_corner_correction else "DESATIVADO"))
 
 
 # ============================================================
@@ -207,8 +260,6 @@ func _ready() -> void:
 # ============================================================
 
 func configurar_corner_rays() -> void:
-	# A configuração automática evita depender das posições antigas
-	# que estavam salvas na cena.
 	if collision_shape.shape is RectangleShape2D:
 		var forma: RectangleShape2D = collision_shape.shape
 		var metade_x: float = forma.size.x * 0.5
@@ -222,13 +273,15 @@ func configurar_corner_rays() -> void:
 		corner_raycast_esquerdo.position = Vector2(esquerda_x, topo_y)
 		corner_raycast_direito.position = Vector2(direita_x, topo_y)
 
-	# Os dois Rays apontam verticalmente para cima.
-	# A direção horizontal é determinada pelo lado que colidir.
 	corner_raycast_esquerdo.target_position = Vector2(0.0, -corner_correction_altura)
 	corner_raycast_direito.target_position = Vector2(0.0, -corner_correction_altura)
 
 	corner_raycast_esquerdo.force_raycast_update()
 	corner_raycast_direito.force_raycast_update()
+
+	if debug_movimento:
+		debug_print("RayCast esquerdo configurado: " + str(corner_raycast_esquerdo.position))
+		debug_print("RayCast direito configurado: " + str(corner_raycast_direito.position))
 
 
 # ============================================================
@@ -243,6 +296,40 @@ func _physics_process(delta: float) -> void:
 	aplicar_corner_correction()
 	move_and_slide()
 	atualizar_coyote()
+	atualizar_debug_estado()
+
+
+# ============================================================
+# DEBUG DE ESTADO
+# ============================================================
+
+func atualizar_debug_estado() -> void:
+	if not debug_movimento:
+		return
+
+	var no_chao_atual: bool = is_on_floor()
+	var subindo_atual: bool = velocity.y < 0.0 and not no_chao_atual
+
+	if no_chao_atual != debug_no_chao_anterior:
+		if no_chao_atual:
+			debug_print("ESTADO: pousou no chão.")
+		else:
+			debug_print("ESTADO: saiu do chão.")
+		debug_no_chao_anterior = no_chao_atual
+
+	if subindo_atual != debug_subindo_anterior:
+		if subindo_atual:
+			if debug_gravidade:
+				debug_print("GRAVIDADE: começou a subida.")
+		else:
+			if debug_gravidade and not no_chao_atual:
+				debug_print("GRAVIDADE: começou a queda.")
+		debug_subindo_anterior = subindo_atual
+
+	if derrapando != debug_derrapando_anterior:
+		if debug_horizontal:
+			debug_print("DERRAPAGEM: " + ("INICIADA" if derrapando else "ENCERRADA"))
+		debug_derrapando_anterior = derrapando
 
 
 # ============================================================
@@ -256,6 +343,20 @@ func processar_movimento_horizontal(delta: float) -> void:
 		is_running = Input.is_action_pressed("correr")
 	else:
 		is_running = false
+
+	if debug_horizontal:
+		if direcao_horizontal != debug_direcao_anterior:
+			if direcao_horizontal > 0.0:
+				debug_print("MOVIMENTO: DIREITA")
+			elif direcao_horizontal < 0.0:
+				debug_print("MOVIMENTO: ESQUERDA")
+			else:
+				debug_print("MOVIMENTO: PAROU")
+			debug_direcao_anterior = direcao_horizontal
+
+		if is_running != debug_corrida_anterior:
+			debug_print("CORRIDA: " + ("ATIVADA" if is_running else "DESATIVADA"))
+			debug_corrida_anterior = is_running
 
 	var velocidade_alvo: float
 	if is_running:
@@ -285,6 +386,9 @@ func processar_movimento_horizontal(delta: float) -> void:
 			0.0,
 			desaceleracao_derrapagem * delta
 		)
+
+		if debug_horizontal:
+			debug_print("DERRAPAGEM: invertendo direção. Velocidade X = " + str(snapped(velocity.x, 0.1)))
 		return
 
 	derrapando = false
@@ -339,6 +443,9 @@ func processar_pulo() -> void:
 	if Input.is_action_just_pressed("pulo"):
 		jump_buffer_timer = tempo_buffer_pulo
 
+		if debug_pulo:
+			debug_print("PULO: botão pressionado -> Jump Buffer ativado.")
+
 	if jump_buffer_timer <= 0.0:
 		return
 
@@ -349,6 +456,9 @@ func processar_pulo() -> void:
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
 
+		if debug_pulo:
+			debug_print("PULO: EXECUTADO | impulso Y = " + str(impulso_pulo))
+
 
 # ============================================================
 # VERIFICAR PULO
@@ -356,10 +466,17 @@ func processar_pulo() -> void:
 
 func pode_pular() -> bool:
 	if is_on_floor():
+		if debug_pulo:
+			debug_print("PULO: permitido pelo chão.")
 		return true
 
 	if coyote_timer > 0.0:
+		if debug_pulo:
+			debug_print("PULO: permitido pelo Coyote Time.")
 		return true
+
+	if debug_pulo and Input.is_action_just_pressed("pulo"):
+		debug_print("PULO: bloqueado - sem chão e Coyote Time expirado.")
 
 	return false
 
@@ -375,6 +492,10 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_released("pulo"):
 		if velocity.y < 0.0:
 			velocity.y *= multiplicador_pulo_curto
+
+		if debug_pulo:
+			debug_print("PULO: botão solto -> pulo curto aplicado.")
+
 		pulando = false
 
 
@@ -383,52 +504,43 @@ func _input(event: InputEvent) -> void:
 # ============================================================
 
 func aplicar_corner_correction() -> void:
-	# Não executa se estiver desativado.
 	if not usar_corner_correction:
 		return
 
-	# Corner Correction é uma ajuda para o salto.
-	# Não deve atuar durante a queda.
 	if corner_correction_apenas_subindo and velocity.y >= 0.0:
 		return
 
-	# Sem movimento horizontal não há um lado preferencial.
 	if direcao_horizontal == 0.0:
 		return
 
-	# Atualiza os dois sensores.
 	corner_raycast_esquerdo.force_raycast_update()
 	corner_raycast_direito.force_raycast_update()
 
 	var esquerdo_bateu: bool = corner_raycast_esquerdo.is_colliding()
 	var direito_bateu: bool = corner_raycast_direito.is_colliding()
 
-	# Se os dois cantos estão presos no teto, não existe espaço lateral
-	# suficiente para uma correção segura.
+	if debug_corner_correction and (esquerdo_bateu or direito_bateu):
+		debug_print("CORNER: RayCast detectou -> Esquerdo=" + str(esquerdo_bateu) + " | Direito=" + str(direito_bateu))
+
 	if esquerdo_bateu and direito_bateu:
+		if debug_corner_correction:
+			debug_print("CORNER: os dois lados detectaram. Correção cancelada.")
 		return
 
-	# A correção é feita para o lado livre.
 	var direcao_correcao: float = 0.0
 
-	# Indo para a direita e o canto direito bateu:
-	# desloca alguns pixels para a esquerda.
 	if direcao_horizontal > 0.0 and direito_bateu and not esquerdo_bateu:
 		direcao_correcao = -1.0
 
-	# Indo para a esquerda e o canto esquerdo bateu:
-	# desloca alguns pixels para a direita.
 	elif direcao_horizontal < 0.0 and esquerdo_bateu and not direito_bateu:
 		direcao_correcao = 1.0
 
 	if direcao_correcao == 0.0:
 		return
 
-	# Guarda a posição original para poder testar cada tentativa.
 	var posicao_original: Vector2 = global_position
 	var transformacao_original: Transform2D = global_transform
 
-	# Procura a menor correção que tira o canto da plataforma.
 	for i in range(1, corner_correction_tentativas + 1):
 		var passo: float = (
 			corner_correction_distancia
@@ -441,11 +553,9 @@ func aplicar_corner_correction() -> void:
 			0.0
 		)
 
-		# Não corrige para dentro de outro obstáculo.
 		if test_move(transformacao_original, deslocamento):
 			continue
 
-		# Testa a posição candidata com os RayCast2D.
 		global_position = posicao_original + deslocamento
 
 		corner_raycast_esquerdo.force_raycast_update()
@@ -454,12 +564,18 @@ func aplicar_corner_correction() -> void:
 		var novo_esquerdo: bool = corner_raycast_esquerdo.is_colliding()
 		var novo_direito: bool = corner_raycast_direito.is_colliding()
 
-		# O lado que estava preso ficou livre.
 		if not novo_esquerdo and not novo_direito:
+			if debug_corner_correction:
+				if direcao_correcao < 0.0:
+					debug_print("DIREITA CORRECT -> deslocou " + str(passo) + " px para a esquerda.")
+				else:
+					debug_print("ESQUERDA CORRECT -> deslocou " + str(passo) + " px para a direita.")
 			return
 
-	# Nenhuma posição testada foi segura.
 	global_position = posicao_original
+
+	if debug_corner_correction:
+		debug_print("CORNER: detectou a quina, mas nenhuma posição segura foi encontrada.")
 
 
 # ============================================================
@@ -468,6 +584,8 @@ func aplicar_corner_correction() -> void:
 
 func atualizar_coyote() -> void:
 	if is_on_floor():
+		if coyote_timer <= 0.0 and debug_temporizadores:
+			debug_print("COYOTE: timer iniciado -> " + str(tempo_coyote) + "s")
 		coyote_timer = tempo_coyote
 
 
@@ -476,6 +594,9 @@ func atualizar_coyote() -> void:
 # ============================================================
 
 func atualizar_temporizadores(delta: float) -> void:
+	var coyote_estava_ativo: bool = coyote_timer > 0.0
+	var buffer_estava_ativo: bool = jump_buffer_timer > 0.0
+
 	if coyote_timer > 0.0:
 		coyote_timer -= delta
 
@@ -484,3 +605,16 @@ func atualizar_temporizadores(delta: float) -> void:
 
 	if pulando:
 		tempo_pulo += delta
+
+	var coyote_ativo: bool = coyote_timer > 0.0
+	var buffer_ativo: bool = jump_buffer_timer > 0.0
+
+	if debug_temporizadores:
+		if coyote_estava_ativo and not coyote_ativo:
+			debug_print("COYOTE: expirou.")
+
+		if buffer_estava_ativo and not buffer_ativo:
+			debug_print("JUMP BUFFER: expirou.")
+
+	debug_coyote_ativo_anterior = coyote_ativo
+	debug_buffer_ativo_anterior = buffer_ativo
