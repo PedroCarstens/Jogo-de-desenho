@@ -51,11 +51,15 @@ var progresso: float = 0.0
 var direcao_movimento: float = 1.0
 var pontos_trajetoria: PackedVector2Array = PackedVector2Array()
 
-# Guarda o ultimo estado conhecido da curva.
-# Isso permite detectar alteracoes feitas diretamente no editor.
-var _ultima_trajetoria: Curve2D
+#========== ORIGEM
+# A trajetoria da Curve2D e armazenada em coordenadas locais da plataforma.
+# Esta variavel guarda onde a plataforma foi colocada no level design.
+# No jogo, a curva e somada a essa origem para manter exatamente a mesma
+# posicao inicial escolhida no editor.
+var origem_global: Vector2 = Vector2.ZERO
+
+# Guarda o estado da curva para detectar alteracoes feitas no editor.
 var _ultima_assinatura_trajetoria: String = ""
-var _ultimo_tamanho: Vector2
 
 
 func _ready() -> void:
@@ -66,6 +70,12 @@ func _ready() -> void:
 		atualizar_editor()
 		return
 
+	# IMPORTANTE:
+	# A posicao em que o designer colocou o prefab na cena vira a origem.
+	# Antes, a plataforma usava diretamente o ponto da Curve2D como
+	# global_position, fazendo ela aparecer em outro lugar quando o jogo iniciava.
+	origem_global = global_position
+
 	if iniciar_no_inicio:
 		progresso = 0.0
 
@@ -73,9 +83,6 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	# @tool permite que este script rode dentro do editor.
-	# Como os pontos da Curve2D podem ser alterados sem mudar nenhuma
-	# propriedade exportada, verificamos a curva continuamente no editor.
 	if Engine.is_editor_hint():
 		verificar_alteracoes_editor()
 
@@ -124,14 +131,15 @@ func atualizar_posicao() -> void:
 	if trajetoria == null or trajetoria.get_point_count() < 2:
 		return
 
-	# sample_baked transforma o progresso em uma distancia real sobre a curva.
-	# Assim, a plataforma segue a interpolacao suave da Curve2D.
-	var nova_posicao: Vector2 = trajetoria.sample_baked(
+	# A Curve2D trabalha em coordenadas locais.
+	# Por isso pegamos a posicao calculada pela curva e somamos a origem
+	# que veio do level design.
+	var deslocamento_curva: Vector2 = trajetoria.sample_baked(
 		progresso * trajetoria.get_baked_length(),
 		fechar_trajetoria
 	)
 
-	global_position = nova_posicao
+	global_position = origem_global + deslocamento_curva
 
 
 #========== ATUALIZACAO DO EDITOR
@@ -151,8 +159,6 @@ func verificar_alteracoes_editor() -> void:
 
 	var assinatura_atual: String = criar_assinatura_trajetoria()
 
-	# Se algum ponto ou alca da Curve2D mudou no editor,
-	# recalculamos imediatamente a linha desenhada.
 	if assinatura_atual != _ultima_assinatura_trajetoria:
 		recalcular_pontos_trajetoria()
 		_ultima_assinatura_trajetoria = assinatura_atual
@@ -211,8 +217,7 @@ func recalcular_pontos_trajetoria() -> void:
 	if trajetoria == null or trajetoria.get_point_count() < 2:
 		return
 
-	# get_baked_length calcula o comprimento aproximado da curva.
-	# sample_baked pega varios pontos igualmente distribuidos pela distancia.
+	# O comprimento da curva permite distribuir os pontos pela trajetoria.
 	var comprimento: float = trajetoria.get_baked_length()
 	if comprimento <= 0.0:
 		return
@@ -238,8 +243,9 @@ func _draw() -> void:
 	if pontos_trajetoria.is_empty():
 		recalcular_pontos_trajetoria()
 
-	# A linha nao e uma segunda trajetoria.
-	# Ela e apenas uma representacao visual dos pontos interpolados pela Curve2D.
+	# Os pontos sao locais ao prefab, assim como a Curve2D.
+	# Portanto a linha desenhada aqui fica exatamente na mesma origem
+	# que a plataforma possui no editor.
 	for i in range(pontos_trajetoria.size() - 1):
 		draw_line(
 			pontos_trajetoria[i],
@@ -262,14 +268,14 @@ func _draw() -> void:
 		for ponto in pontos_trajetoria:
 			draw_circle(ponto, 2.5, Color(1.0, 0.8, 0.15, 0.85))
 
-		# Ponto inicial da Curve2D.
+		# Ponto inicial da trajetoria.
 		draw_circle(
 			trajetoria.get_point_position(0),
 			5.0,
 			Color(0.3, 1.0, 0.4, 1.0)
 		)
 
-		# Ponto final da Curve2D.
+		# Ponto final da trajetoria.
 		draw_circle(
 			trajetoria.get_point_position(trajetoria.get_point_count() - 1),
 			5.0,
