@@ -8,6 +8,13 @@
 [ext_resource type="Script" uid="uid://6qgcpevec1ck" path="res://scripts/player/Camera.gd" id="5_trhll"]
 [ext_resource type="Script" uid="uid://b0ld4ldve45vm" path="res://scripts/ApagarDesenhos.gd" id="7_fkpx4"]
 [ext_resource type="Script" uid="uid://csqmmgk5yk00u" path="res://scripts/ResetLayout.gd" id="8_cqvk4"]
+[ext_resource type="PackedScene" uid="uid://dlwujl32e740p" path="res://gameobjects/plataforma_movel/PlataformaMovel.tscn" id="9_n7d02"]
+
+[sub_resource type="Curve2D" id="Curve2D_n7d02"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 0, 160)
+}
+point_count = 2
 
 [node name="debug" type="Node2D" unique_id=1587276390]
 position = Vector2(4, 0)
@@ -42,7 +49,7 @@ desenho_controller = NodePath("../../DesenhoController")
 [node name="mapa" type="Node" parent="." unique_id=1090235493]
 
 [node name="grass(placeholder)" parent="mapa" unique_id=368029222 instance=ExtResource("1_loh58")]
-position = Vector2(392.99988, 609)
+position = Vector2(397, 638)
 rotation = -3.1415927
 scale = Vector2(3.96058, -0.168685)
 
@@ -53,5 +60,9 @@ scale = Vector2(3.96058, -0.168685)
 
 [node name="ResetLayout" type="Node" parent="." unique_id=1752049622]
 script = ExtResource("8_cqvk4")
+
+[node name="PlataformaMovel" parent="." unique_id=11420992 instance=ExtResource("9_n7d02")]
+position = Vector2(384, 283)
+trajetoria = SubResource("Curve2D_n7d02")
 
 [editable path="DesenhoController"]

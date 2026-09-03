@@ -1,18 +1,27 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dlwujl32e740p"]
 
-[ext_resource type="Script" path="res://gameobjects/plataforma_movel/MovingPlatform.gd" id="1_platform"]
+[ext_resource type="Script" uid="uid://7fx74cnn86y5" path="res://gameobjects/plataforma_movel/MovingPlatform.gd" id="1_platform"]
+
+[sub_resource type="Curve2D" id="Curve2D_02xh7"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 160)
+}
+point_count = 2
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
 size = Vector2(96, 20)
 
-[node name="PlataformaMovel" type="AnimatableBody2D"]
+[node name="PlataformaMovel" type="AnimatableBody2D" unique_id=321523041]
 script = ExtResource("1_platform")
-sync_to_physics = true
+trajetoria = SubResource("Curve2D_02xh7")
 
-[node name="Visual" type="Polygon2D" parent="."]
+[node name="Visual" type="Polygon2D" parent="." unique_id=1424329059]
+position = Vector2(0, 163)
 polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1151745405]
+position = Vector2(0, 163)
 shape = SubResource("RectangleShape2D_platform")
 
-[node name="PontoOrigem" type="Marker2D" parent="."]
+[node name="PontoOrigem" type="Marker2D" parent="." unique_id=168420851]
+position = Vector2(0, 163)

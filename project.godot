@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="jogo_desenho"
-run/main_scene="res://niveis/level_1_classico.tscn"
+run/main_scene="uid://cpv85q0yg3ftm"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
