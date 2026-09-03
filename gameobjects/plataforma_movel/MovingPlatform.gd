@@ -51,8 +51,12 @@ var progresso: float = 0.0
 var direcao_movimento: float = 1.0
 var pontos_trajetoria: PackedVector2Array = PackedVector2Array()
 
+# Guarda o ultimo estado conhecido da curva.
+# Isso permite detectar alteracoes feitas diretamente no editor.
 var _ultima_trajetoria: Curve2D
+var _ultima_assinatura_trajetoria: String = ""
 var _ultimo_tamanho: Vector2
+
 
 func _ready() -> void:
 	configurar_trajetoria_padrao()
@@ -66,6 +70,14 @@ func _ready() -> void:
 		progresso = 0.0
 
 	atualizar_posicao()
+
+
+func _process(_delta: float) -> void:
+	# @tool permite que este script rode dentro do editor.
+	# Como os pontos da Curve2D podem ser alterados sem mudar nenhuma
+	# propriedade exportada, verificamos a curva continuamente no editor.
+	if Engine.is_editor_hint():
+		verificar_alteracoes_editor()
 
 
 func _physics_process(delta: float) -> void:
@@ -112,6 +124,8 @@ func atualizar_posicao() -> void:
 	if trajetoria == null or trajetoria.get_point_count() < 2:
 		return
 
+	# sample_baked transforma o progresso em uma distancia real sobre a curva.
+	# Assim, a plataforma segue a interpolacao suave da Curve2D.
 	var nova_posicao: Vector2 = trajetoria.sample_baked(
 		progresso * trajetoria.get_baked_length(),
 		fechar_trajetoria
@@ -120,15 +134,53 @@ func atualizar_posicao() -> void:
 	global_position = nova_posicao
 
 
+#========== ATUALIZACAO DO EDITOR
 func atualizar_editor() -> void:
 	if not Engine.is_editor_hint():
 		return
 
 	configurar_trajetoria_padrao()
 	recalcular_pontos_trajetoria()
+	atualizar_assinatura_trajetoria()
 	queue_redraw()
 
 
+func verificar_alteracoes_editor() -> void:
+	if trajetoria == null:
+		return
+
+	var assinatura_atual: String = criar_assinatura_trajetoria()
+
+	# Se algum ponto ou alca da Curve2D mudou no editor,
+	# recalculamos imediatamente a linha desenhada.
+	if assinatura_atual != _ultima_assinatura_trajetoria:
+		recalcular_pontos_trajetoria()
+		_ultima_assinatura_trajetoria = assinatura_atual
+		queue_redraw()
+
+
+func criar_assinatura_trajetoria() -> String:
+	if trajetoria == null:
+		return "null"
+
+	var assinatura: String = str(trajetoria.get_point_count())
+
+	for i in range(trajetoria.get_point_count()):
+		assinatura += "|"
+		assinatura += str(trajetoria.get_point_position(i))
+		assinatura += "|"
+		assinatura += str(trajetoria.get_point_in(i))
+		assinatura += "|"
+		assinatura += str(trajetoria.get_point_out(i))
+
+	return assinatura
+
+
+func atualizar_assinatura_trajetoria() -> void:
+	_ultima_assinatura_trajetoria = criar_assinatura_trajetoria()
+
+
+#========== VISUAL
 func atualizar_visual() -> void:
 	var colisao: CollisionShape2D = get_node_or_null("CollisionShape2D") as CollisionShape2D
 	var visual: Polygon2D = get_node_or_null("Visual") as Polygon2D
@@ -159,16 +211,20 @@ func recalcular_pontos_trajetoria() -> void:
 	if trajetoria == null or trajetoria.get_point_count() < 2:
 		return
 
+	# get_baked_length calcula o comprimento aproximado da curva.
+	# sample_baked pega varios pontos igualmente distribuidos pela distancia.
 	var comprimento: float = trajetoria.get_baked_length()
 	if comprimento <= 0.0:
 		return
 
-	for i in range(quantidade_pontos_editor + 1):
-		var distancia: float = comprimento * (float(i) / float(quantidade_pontos_editor))
+	var quantidade: int = max(quantidade_pontos_editor, 1)
+
+	for i in range(quantidade + 1):
+		var distancia: float = comprimento * (float(i) / float(quantidade))
 		pontos_trajetoria.append(trajetoria.sample_baked(distancia, fechar_trajetoria))
 
 
-#========== EDITOR / TRAJETORIA
+#========== DESENHO DA TRAJETORIA NO EDITOR
 func _draw() -> void:
 	if not Engine.is_editor_hint():
 		return
@@ -182,6 +238,8 @@ func _draw() -> void:
 	if pontos_trajetoria.is_empty():
 		recalcular_pontos_trajetoria()
 
+	# A linha nao e uma segunda trajetoria.
+	# Ela e apenas uma representacao visual dos pontos interpolados pela Curve2D.
 	for i in range(pontos_trajetoria.size() - 1):
 		draw_line(
 			pontos_trajetoria[i],
@@ -204,10 +262,14 @@ func _draw() -> void:
 		for ponto in pontos_trajetoria:
 			draw_circle(ponto, 2.5, Color(1.0, 0.8, 0.15, 0.85))
 
-		# Ponto inicial
-		draw_circle(trajetoria.get_point_position(0), 5.0, Color(0.3, 1.0, 0.4, 1.0))
+		# Ponto inicial da Curve2D.
+		draw_circle(
+			trajetoria.get_point_position(0),
+			5.0,
+			Color(0.3, 1.0, 0.4, 1.0)
+		)
 
-		# Ponto final
+		# Ponto final da Curve2D.
 		draw_circle(
 			trajetoria.get_point_position(trajetoria.get_point_count() - 1),
 			5.0,
@@ -220,6 +282,7 @@ func _notification(what: int) -> void:
 		if Engine.is_editor_hint():
 			configurar_trajetoria_padrao()
 			recalcular_pontos_trajetoria()
+			atualizar_assinatura_trajetoria()
 
 
 func _get_configuration_warnings() -> PackedStringArray:
