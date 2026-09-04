@@ -146,29 +146,18 @@ func calcular_t_interpolado(t: float) -> float:
 	return t
 
 
-#========== AMOSTRAGEM SEGURA DA CURVA
+#========== AMOSTRAGEM DA CURVA
 func amostrar_trajetoria(t: float) -> Vector2:
 	if trajetoria == null or trajetoria.get_point_count() < 2:
 		return Vector2.ZERO
 
 	t = clamp(t, 0.0, 1.0)
 
-	# Nao usamos sample_baked nos extremos.
-	# Isso evita o erro "Zero length interval" do Godot em alguns casos.
-	if t <= 0.0:
-		return trajetoria.get_point_position(0)
-
-	if t >= 1.0:
-		return trajetoria.get_point_position(trajetoria.get_point_count() - 1)
-
-	var comprimento: float = trajetoria.get_baked_length()
-	if comprimento <= 0.0:
-		return trajetoria.get_point_position(0).lerp(
-			trajetoria.get_point_position(trajetoria.get_point_count() - 1),
-			t
-		)
-
-	return trajetoria.sample_baked(t * comprimento, true)
+	# Usamos samplef em vez de sample_baked.
+	# Isso evita o "Zero length interval" e continua permitindo
+	# curvas Bezier com varios pontos e alcas editaveis.
+	var ultimo_indice: int = trajetoria.get_point_count() - 1
+	return trajetoria.samplef(t * float(ultimo_indice))
 
 
 func atualizar_posicao() -> void:
