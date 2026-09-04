@@ -146,17 +146,38 @@ func calcular_t_interpolado(t: float) -> float:
 	return t
 
 
+#========== AMOSTRAGEM SEGURA DA CURVA
+func amostrar_trajetoria(t: float) -> Vector2:
+	if trajetoria == null or trajetoria.get_point_count() < 2:
+		return Vector2.ZERO
+
+	t = clamp(t, 0.0, 1.0)
+
+	# Nao usamos sample_baked nos extremos.
+	# Isso evita o erro "Zero length interval" do Godot em alguns casos.
+	if t <= 0.0:
+		return trajetoria.get_point_position(0)
+
+	if t >= 1.0:
+		return trajetoria.get_point_position(trajetoria.get_point_count() - 1)
+
+	var comprimento: float = trajetoria.get_baked_length()
+	if comprimento <= 0.0:
+		return trajetoria.get_point_position(0).lerp(
+			trajetoria.get_point_position(trajetoria.get_point_count() - 1),
+			t
+		)
+
+	return trajetoria.sample_baked(t * comprimento, true)
+
+
 func atualizar_posicao() -> void:
 	if trajetoria == null or trajetoria.get_point_count() < 2:
 		return
 
 	# Primeiro calculamos o t alterado pela funcao de interpolacao.
 	var t_interpolado: float = calcular_t_interpolado(progresso)
-
-	# Depois transformamos esse t em distancia real sobre a Curve2D.
-	var comprimento: float = trajetoria.get_baked_length()
-	var distancia: float = t_interpolado * comprimento
-	var deslocamento_curva: Vector2 = trajetoria.sample_baked(distancia, true)
+	var deslocamento_curva: Vector2 = amostrar_trajetoria(t_interpolado)
 
 	# A curva e local ao prefab. Somamos a origem colocada pelo designer.
 	global_position = origem_global + deslocamento_curva
@@ -221,16 +242,11 @@ func recalcular_pontos_trajetoria() -> void:
 	if trajetoria == null or trajetoria.get_point_count() < 2:
 		return
 
-	var comprimento: float = trajetoria.get_baked_length()
-	if comprimento <= 0.0:
-		return
-
 	var quantidade: int = max(quantidade_pontos_editor, 1)
 
 	for i in range(quantidade + 1):
 		var t: float = float(i) / float(quantidade)
-		var distancia: float = comprimento * t
-		pontos_trajetoria.append(trajetoria.sample_baked(distancia, true))
+		pontos_trajetoria.append(amostrar_trajetoria(t))
 
 	if fechar_trajetoria and pontos_trajetoria.size() > 1:
 		pontos_trajetoria.append(pontos_trajetoria[0])
@@ -242,17 +258,12 @@ func recalcular_pontos_interpolados() -> void:
 	if trajetoria == null or trajetoria.get_point_count() < 2:
 		return
 
-	var comprimento: float = trajetoria.get_baked_length()
-	if comprimento <= 0.0:
-		return
-
 	var quantidade: int = max(quantidade_pontos_editor, 1)
 
 	for i in range(quantidade + 1):
 		var t: float = float(i) / float(quantidade)
 		var t_interpolado: float = calcular_t_interpolado(t)
-		var distancia: float = comprimento * t_interpolado
-		pontos_interpolados.append(trajetoria.sample_baked(distancia, true))
+		pontos_interpolados.append(amostrar_trajetoria(t_interpolado))
 
 
 #========== VISUAL DA PLATAFORMA
