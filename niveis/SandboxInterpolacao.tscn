@@ -4,25 +4,25 @@
 
 [sub_resource type="Curve2D" id="Curve_linear"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 180)
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 600, 0, 0, 0, 0, 0)
 }
 point_count = 2
 
 [sub_resource type="Curve2D" id="Curve_ease_in"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 180)
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 600, 0, 0, 0, 0, 0)
 }
 point_count = 2
 
 [sub_resource type="Curve2D" id="Curve_ease_out"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 180)
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 600, 0, 0, 0, 0, 0)
 }
 point_count = 2
 
 [sub_resource type="Curve2D" id="Curve_ease_in_out"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 180)
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 600, 0, 0, 0, 0, 0)
 }
 point_count = 2
 
@@ -35,61 +35,65 @@ theme_override_font_sizes/font_size = 24
 
 [node name="Descricao" type="Label" parent="."]
 position = Vector2(40, 58)
-text = "Mesmo percurso • mesmo A e B • mesma duracao • apenas a resposta de t muda"
+text = "Mesmo A e B • mesma duracao • apenas a funcao de t muda"
 theme_override_font_sizes/font_size = 16
 
 [node name="Linear" parent="." instance=ExtResource("1_platform")]
-position = Vector2(180, 120)
+position = Vector2(150, 120)
 duracao = 2.0
+usar_duracao = true
 tipo_interpolacao = 0
 ping_pong = true
 trajetoria = SubResource("Curve_linear")
 
 [node name="Label" type="Label" parent="Linear"]
-position = Vector2(-70, -45)
+position = Vector2(-70, -35)
 text = "LINEAR"
 theme_override_font_sizes/font_size = 16
 
 [node name="EaseIn" parent="." instance=ExtResource("1_platform")]
-position = Vector2(180, 260)
+position = Vector2(150, 250)
 duracao = 2.0
+usar_duracao = true
 tipo_interpolacao = 1
 ping_pong = true
 trajetoria = SubResource("Curve_ease_in")
 
 [node name="Label" type="Label" parent="EaseIn"]
-position = Vector2(-70, -45)
+position = Vector2(-70, -35)
 text = "EASE IN"
 theme_override_font_sizes/font_size = 16
 
 [node name="EaseOut" parent="." instance=ExtResource("1_platform")]
-position = Vector2(180, 400)
+position = Vector2(150, 380)
 duracao = 2.0
+usar_duracao = true
 tipo_interpolacao = 2
 ping_pong = true
 trajetoria = SubResource("Curve_ease_out")
 
 [node name="Label" type="Label" parent="EaseOut"]
-position = Vector2(-70, -45)
+position = Vector2(-70, -35)
 text = "EASE OUT"
 theme_override_font_sizes/font_size = 16
 
 [node name="EaseInOut" parent="." instance=ExtResource("1_platform")]
-position = Vector2(180, 540)
+position = Vector2(150, 510)
 duracao = 2.0
+usar_duracao = true
 tipo_interpolacao = 3
 ping_pong = true
 trajetoria = SubResource("Curve_ease_in_out")
 
 [node name="Label" type="Label" parent="EaseInOut"]
-position = Vector2(-70, -45)
+position = Vector2(-70, -35)
 text = "EASE IN-OUT"
 theme_override_font_sizes/font_size = 16
 
-[node name="A" type="Label" parent="."]
-position = Vector2(105, 635)
-text = "A = inicio"
+[node name="LegendaA" type="Label" parent="."]
+position = Vector2(145, 600)
+text = "A = 0    t = 0"
 
-[node name="B" type="Label" parent="."]
-position = Vector2(850, 635)
-text = "B = final"
+[node name="LegendaB" type="Label" parent="."]
+position = Vector2(730, 600)
+text = "B = 600    t = 1"
