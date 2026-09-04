@@ -1,36 +1,24 @@
-[gd_scene format=3 uid="uid://dlwujl32e740p"]
+[gd_scene load_steps=4 format=3 uid="uid://dlwujl32e740p"]
 
 [ext_resource type="Script" uid="uid://7fx74cnn86y5" path="res://gameobjects/plataforma_movel/MovingPlatform.gd" id="1_platform"]
 
-[sub_resource type="Curve2D" id="Curve2D_02xh7"]
+[sub_resource type="Curve2D" id="Curve2D_platform"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 160)
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 180)
 }
 point_count = 2
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
 size = Vector2(96, 20)
 
-[node name="PlataformaMovel" type="AnimatableBody2D" unique_id=321523041]
+[node name="PlataformaMovel" type="AnimatableBody2D"]
 script = ExtResource("1_platform")
-trajetoria = SubResource("Curve2D_02xh7")
+trajetoria = SubResource("Curve2D_platform")
 
-[node name="Visual" type="Polygon2D" parent="." unique_id=1424329059]
-<<<<<<< Updated upstream
+[node name="Visual" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1151745405]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_platform")
 
-[node name="PontoOrigem" type="Marker2D" parent="." unique_id=168420851]
-=======
-position = Vector2(0, -1)
-polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1151745405]
-position = Vector2(0, -1)
-shape = SubResource("RectangleShape2D_platform")
-
-[node name="PontoOrigem" type="Marker2D" parent="." unique_id=168420851]
-position = Vector2(0, -1)
->>>>>>> Stashed changes
+[node name="PontoOrigem" type="Marker2D" parent="."]
