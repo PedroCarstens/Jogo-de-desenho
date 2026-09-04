@@ -16,12 +16,9 @@ script = ExtResource("1_platform")
 trajetoria = SubResource("Curve2D_02xh7")
 
 [node name="Visual" type="Polygon2D" parent="." unique_id=1424329059]
-position = Vector2(0, 163)
 polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1151745405]
-position = Vector2(0, 163)
 shape = SubResource("RectangleShape2D_platform")
 
 [node name="PontoOrigem" type="Marker2D" parent="." unique_id=168420851]
-position = Vector2(0, 163)
